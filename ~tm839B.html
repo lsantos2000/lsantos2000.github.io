@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<!-- saved from url=(0076)https://ansible.github.io/workshops/exercises/ansible_security/2.3-incident/ -->
+<html lang="en-US">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- Begin Jekyll SEO tag v2.7.1 -->
+  <title>Exercise 2.3 - Incident response | workshops</title>
+  <meta name="generator" content="Jekyll v3.9.0">
+  <meta property="og:title" content="Exercise 2.3 - Incident response">
+  <meta property="og:locale" content="en_US">
+  <meta name="description" content="Training Course for Ansible Automation Platform">
+  <meta property="og:description" content="Training Course for Ansible Automation Platform">
+  <link rel="canonical" href="https://ansible.github.io/workshops/exercises/ansible_security/2.3-incident/">
+  <meta property="og:url" content="https://ansible.github.io/workshops/exercises/ansible_security/2.3-incident/">
+  <meta property="og:site_name" content="workshops">
+  <meta name="twitter:card" content="summary">
+  <meta property="twitter:title" content="Exercise 2.3 - Incident response">
+  <script type="application/ld+json">
+  {"description":"Training Course for Ansible Automation Platform","url":"https://ansible.github.io/workshops/exercises/ansible_security/2.3-incident/","@type":"WebPage","headline":"Exercise 2.3 - Incident response","@context":"https://schema.org"}
+  <script type="application/ld+json">
+  {"description":"QRadar Workshop - Automatic Incident Response with Red Hat Ansible Security","url":"https://ansible.github.io/workshops/exercises/ansible_security/","@type":"WebPage","headline":"Ansible Workshop - Ansible Security Automation","@context":"https://schema.org"}
+  </script><!-- End Jekyll SEO tag -->
+  <link rel="stylesheet" href="./styles/style.css">
+  <script src="./scripts/scale.fix.js.download"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body ccID="2107">
+  <div ccID="2117" class="wrapper">
+    <header ccID="2144">
+      <div ccID="2160" class="header-container">
+        <a ccID="2200" href="https://redhat.com/" target="_new&quot;"><img ccID="2250" class="header-logo" src="./images/redhat-logo.svg" title="Red Hat" alt=
+        "Red Hat"></a> <a ccID="2351" href="https://www.cgsinc.com/en/learning" target="_new&quot;"><img ccID="2416" class="header-logo" src="./images/cgsinc-logo.png"
+        title="CGS Inc. Learning" alt="CGS Inc. Learning"></a> <a ccID="2536" class="header-link" href="index.html">Workshops Home</a>
+      </div>
+    </header>
+    <section ccID="2630">
+      <h1 ccID="2647" id="exercise-23---incident-response">Exercise 2.3 - Incident response</h1>
+
+      <h2 ccID="2735" id="step-31---background">Step 3.1 - Background</h2>
+      <p ccID="2799">In this exercise we will focus on threat detection and response capabilities. As usual, security operators need a set of tools in
+      enterprise IT to perform this task.</p>
+      <p ccID="2986">You are a security operator in charge of the corporate IDS. The IDS of our choice is Snort.</p>
+      <h2 ccID="3092" id="step-32---preparations">Step 3.2 - Preparations</h2>
+      <p ccID="3160">We will start this exercise with an operator looking at logs in Snort. So first we need to set up a snort rule to actually generate
+      log entries. In your VS Code online editor, create and run the playbook <code ccID="3374" class=
+      "language-plaintext highlighter-rouge">incident_snort_rule.yml</code>:</p><!--  -->
+      <div ccID="3485" class="language-yml highlighter-rouge">
+        <div ccID="3539" class="highlight">
+          <pre ccID="3574" class="highlight"><code ccID="3597"><span ccID="3603" class="nn">---</span>
+<span ccID="3632" class="pi">-</span> <span ccID="3658" class="na">name</span><span ccID="3686" class="pi">:</span> <span ccID="3712" class=
+"s">Add ids signature for sql injection simulation</span>
+  <span ccID="3787" class="na">hosts</span><span ccID="3816" class="pi">:</span> <span ccID="3842" class="s">ids</span>
+  <span ccID="3872" class="na">become</span><span ccID="3902" class="pi">:</span> <span ccID="3928" class="s">yes</span>
+
+  <span ccID="3960" class="na">vars</span><span ccID="3988" class="pi">:</span>
+    <span ccID="4019" class="na">ids_provider</span><span ccID="4055" class="pi">:</span> <span ccID="4081" class="s">snort</span>
+    <span ccID="4115" class="na">protocol</span><span ccID="4147" class="pi">:</span> <span ccID="4173" class="s">tcp</span>
+    <span ccID="4205" class="na">source_port</span><span ccID="4240" class="pi">:</span> <span ccID="4266" class="s">any</span>
+    <span ccID="4298" class="na">source_ip</span><span ccID="4331" class="pi">:</span> <span ccID="4357" class="s">any</span>
+    <span ccID="4389" class="na">dest_port</span><span ccID="4422" class="pi">:</span> <span ccID="4448" class="s">any</span>
+    <span ccID="4480" class="na">dest_ip</span><span ccID="4511" class="pi">:</span> <span ccID="4537" class="s">any</span>
+
+  <span ccID="4569" class="na">tasks</span><span ccID="4598" class="pi">:</span>
+    <span ccID="4629" class="pi">-</span> <span ccID="4655" class="na">name</span><span ccID="4683" class="pi">:</span> <span ccID="4709" class="s">Add snort sql injection rule</span>
+      <span ccID="4768" class="na">include_role</span><span ccID="4804" class="pi">:</span>
+        <span ccID="4839" class="na">name</span><span ccID="4867" class="pi">:</span> <span ccID="4893" class="s2">&quot;</span><span ccID="4923" class=
+"s">ansible_security.ids_rule&quot;</span>
+      <span ccID="4987" class="na">vars</span><span ccID="5015" class="pi">:</span>
+        <span ccID="5050" class="na">ids_rule</span><span ccID="5082" class="pi">:</span> <span ccID="5108" class="s1">&#39;</span><span ccID="5137" class="s">alert</span><span ccID="5165" class=
+"nv"> </span><span ccID="5192" class="s">{{protocol}}</span><span ccID="5227" class="nv"> </span><span ccID="5252" class="s">{{source_ip}}</span><span ccID="5288" class=
+"nv"> </span><span ccID="5315" class="s">{{source_port}}</span><span ccID="5353" class="nv"> </span><span ccID="5378" class="s">-&gt;</span><span ccID="5406" class="nv"> </span><span ccID="5431" class=
+"s">{{dest_ip}}</span><span ccID="5467" class="nv"> </span><span ccID="5492" class="s">{{dest_port}}</span><span ccID="5528" class="nv">  </span><span ccID="5554" class=
+"s">(msg:&quot;Attempted</span><span ccID="5599" class="nv"> </span><span ccID="5624" class="s">SQL</span><span ccID="5650" class="nv"> </span><span ccID="5675" class=
+"s">Injection&quot;;</span><span ccID="5716" class="nv"> </span><span ccID="5741" class="s">uricontent:&quot;/sql_injection_simulation&quot;;</span><span ccID="5813" class=
+"nv"> </span><span ccID="5840" class="s">classtype:attempted-admin;</span><span ccID="5889" class="nv"> </span><span ccID="5914" class="s">sid:99000030;</span><span ccID="5950" class=
+"nv"> </span><span ccID="5977" class="s">priority:1;</span><span ccID="6011" class="nv"> </span><span ccID="6036" class="s">rev:1;)&#39;</span>
+        <span ccID="6081" class="na">ids_rules_file</span><span ccID="6119" class="pi">:</span> <span ccID="6145" class="s1">&#39;</span><span ccID="6174" class=
+"s">/etc/snort/rules/local.rules&#39;</span>
+        <span ccID="6242" class="na">ids_rule_state</span><span ccID="6280" class="pi">:</span> <span ccID="6306" class="s">present</span>
+</code></pre>
+        </div>
+      </div><!--  -->
+      <p ccID="6398">To be able to execute the playbook we will use the prepared role <code ccID="6466" class="language-plaintext highlighter-rouge">ids_rule</code> to
+      modify IDS rules, like we did in the previous Snort exercise. If you missed that, install them via: <code ccID="6643" class=
+      "language-plaintext highlighter-rouge">ansible-galaxy install ansible_security.ids_rule</code></p>
+      <p ccID="6769">The same is true for the role <code ccID="6802" class="language-plaintext highlighter-rouge">ids.config</code>: <code ccID="6872" class=
+      "language-plaintext highlighter-rouge">ansible-galaxy install ansible_security.ids_config</code></p>
+      <p ccID="7000">Run the playbook with:</p>
+      <div ccID="7037" class="language-bash highlighter-rouge">
+        <div ccID="7092" class="highlight">
+          <pre ccID="7127" class="highlight"><code ccID="7150"><span ccID="7156" class="o">[</span>student&lt;X&gt;@ansible ~]<span ccID="7207" class=
+          "nv">$ </span>ansible-playbook incident_snort_rule.yml
+</code></pre>
+        </div>
+      </div>
+      <p ccID="7338">To have those rules generate logs, we need suspicious traffic - an attack. Again we have a playbook which simulates a simple access
+      every few seconds on which the other components in this exercise will later on react to. In your VS Code online editor, create the
+      playbook <code ccID="7627" class="language-plaintext highlighter-rouge">sql_injection_simulation.yml</code> with the following content:</p><!--  -->
+      <div ccID="7762" class="language-yml highlighter-rouge">
+        <div ccID="7816" class="highlight">
+          <pre ccID="7851" class="highlight"><code ccID="7874"><span ccID="7880" class="nn">---</span>
+<span ccID="7909" class="pi">-</span> <span ccID="7935" class="na">name</span><span ccID="7963" class="pi">:</span> <span ccID="7989" class="s">start sql injection simulation</span>
+  <span ccID="8046" class="na">hosts</span><span ccID="8075" class="pi">:</span> <span ccID="8101" class="s">attacker</span>
+  <span ccID="8136" class="na">become</span><span ccID="8166" class="pi">:</span> <span ccID="8192" class="s">yes</span>
+  <span ccID="8222" class="na">gather_facts</span><span ccID="8258" class="pi">:</span> <span ccID="8284" class="s">no</span>
+
+  <span ccID="8315" class="na">tasks</span><span ccID="8344" class="pi">:</span>
+    <span ccID="8375" class="pi">-</span> <span ccID="8401" class="na">name</span><span ccID="8429" class="pi">:</span> <span ccID="8455" class=
+"s">simulate sql injection attack every 5 seconds</span>
+      <span ccID="8533" class="na">shell</span><span ccID="8562" class="pi">:</span> <span ccID="8588" class="s2">&quot;</span><span ccID="8618" class="s">/sbin/daemonize</span><span ccID="8656" class=
+"nv"> </span><span ccID="8683" class="s">/usr/bin/watch</span><span ccID="8720" class="nv"> </span><span ccID="8745" class="s">-n</span><span ccID="8770" class="nv"> </span><span ccID="8795" class=
+"s">5</span><span ccID="8821" class="nv"> </span><span ccID="8846" class="s">curl</span><span ccID="8873" class="nv"> </span><span ccID="8898" class="s">-m</span><span ccID="8923" class=
+"nv"> </span><span ccID="8950" class="s">2</span><span ccID="8974" class="nv"> </span><span ccID="8999" class="s">-s</span><span ccID="9024" class="nv"> </span><span ccID="9049" class=
+"s">http://{{</span><span ccID="9083" class="nv"> </span><span ccID="9108" class="s">hostvars[&#39;snort&#39;][&#39;private_ip2&#39;]</span><span ccID="9179" class=
+"nv"> </span><span ccID="9206" class="s">}}/sql_injection_simulation&quot;</span>
+</code></pre>
+        </div>
+      </div><!--  -->
+      <p ccID="9324">Run it with:</p>
+      <div ccID="9351" class="language-bash highlighter-rouge">
+        <div ccID="9406" class="highlight">
+          <pre ccID="9441" class="highlight"><code ccID="9464"><span ccID="9470" class="o">[</span>student&lt;X&gt;@ansible ~]<span ccID="9521" class=
+          "nv">$ </span>ansible-playbook sql_injection_simulation.yml
+</code></pre>
+        </div>
+      </div>
+      <p ccID="9657">Also we need the QRadar collection. This was installed already in the previous QRadar exercise. If you missed that part, install them
+      via: <code ccID="9806" class="language-plaintext highlighter-rouge">ansible-galaxy collection install ibm.qradar</code></p>
+      <p ccID="9920">Also, to let the traffic between both machines pass, two things from the first Check Point exercise need to be completed: first the
+      playbook <code ccID="10071" class="language-plaintext highlighter-rouge">whitelist_attacker.yml</code> must have been run. And the logging for the
+      attacker whitelist policy must have been activated. If you missed those steps, go back to the first Check Point exercise, create and
+      execute the playbook, follow the steps to activate the logging and come back here.</p>
+      <p ccID="10437">The stage is set now. Read on to learn what this use case is about.</p>
+      <h2 ccID="10519" id="step-33---identify-incident">Step 3.3 - Identify incident</h2>
+      <p ccID="10597">As the security operator in charge of the corporate IDS, you routinely check the logs. From the terminal of your VS Code online
+      editor, SSH to your snort node as the user <code ccID="10778" class="language-plaintext highlighter-rouge">ec2-user</code> and view the logs:</p>
+      <div ccID="10875" class="language-bash highlighter-rouge">
+        <div ccID="10930" class="highlight">
+          <pre ccID="10965" class="highlight"><code ccID="10988"><span ccID="10994" class="o">[</span>ec2-user@ip-172-16-11-22 ~]<span ccID="11045" class="nv">$ </span>journalctl <span ccID="11082" class=
+          "nt">-u</span> snort <span ccID="11127" class="nt">-f</span>
+<span ccID="11155" class="nt">--</span> Logs begin at Sun 2019-09-22 14:24:07 UTC. <span ccID="11225" class="nt">--</span>
+Sep 22 21:03:03 ip-172-16-115-120.ec2.internal snort[22192]: <span ccID="11314" class="o">[</span>1:99000030:1] Attempted SQL Injection <span ccID="11376" class=
+"o">[</span>Classification: Attempted Administrator Privilege Gain] <span ccID="11458" class="o">[</span>Priority: 1] <span ccID="11495" class=
+"o">{</span>TCP<span ccID="11524" class="o">}</span> 172.17.78.163:53376 -&gt; 172.17.23.180:80
+Sep 22 21:03:08 ip-172-16-115-120.ec2.internal snort[22192]: <span ccID="11654" class="o">[</span>1:99000030:1] Attempted SQL Injection <span ccID="11716" class=
+"o">[</span>Classification: Attempted Administrator Privilege Gain] <span ccID="11798" class="o">[</span>Priority: 1] <span ccID="11835" class=
+"o">{</span>TCP<span ccID="11864" class="o">}</span> 172.17.78.163:53378 -&gt; 172.17.23.180:80
+Sep 22 21:03:13 ip-172-16-115-120.ec2.internal snort[22192]: <span ccID="11994" class="o">[</span>1:99000030:1] Attempted SQL Injection <span ccID="12056" class=
+"o">[</span>Classification: Attempted Administrator Privilege Gain] <span ccID="12138" class="o">[</span>Priority: 1] <span ccID="12175" class=
+"o">{</span>TCP<span ccID="12204" class="o">}</span> 172.17.78.163:53380 -&gt; 172.17.23.180:80
+</code></pre>
+        </div>
+      </div>
+      <p ccID="12324">As you see this node has just registered multiple alerts to an <strong ccID="12390">Attempted Administrator Privilege Gain</strong>. Leave the log
+      view by pressing <code ccID="12485" class="language-plaintext highlighter-rouge">CTRL-C</code>.</p>
+      <p ccID="12562">If you want a closer look at the details in the snort log, check out the content of the file <code ccID="12658" class=
+      "language-plaintext highlighter-rouge">/var/log/snort/merged.log</code> on the Snort machine:</p>
+      <div ccID="12783" class="language-bash highlighter-rouge">
+        <div ccID="12838" class="highlight">
+          <pre ccID="12873" class="highlight"><code ccID="12896"><span ccID="12902" class="o">[</span>ec2-user@ip-172-16-180-99 ~]<span ccID="12954" class="nv">$ </span><span ccID="12980" class=
+          "nb">sudo tail</span> <span ccID="13026" class="nt">-f</span> /var/log/snort/merged.log
+Accept: <span ccID="13088" class="k">*</span>/<span ccID="13113" class="k">*</span>
+<span ccID="13139" class="o">[</span>...]
+GET /sql_injection_simulation HTTP/1.1
+User-Agent: curl/7.29.0
+Host: 172.17.30.140
+Accept: <span ccID="13263" class="k">*</span>/<span ccID="13288" class="k">*</span>
+</code></pre>
+        </div>
+      </div>
+      <p ccID="13365">Besides some weird characters you will see the actual malformed “attack” of the user in the form of the string <code ccID="13483" class=
+      "language-plaintext highlighter-rouge">sql_injection_simulation</code>. Leave the Snort server with the command <code ccID="13615" class=
+      "language-plaintext highlighter-rouge">exit</code> .</p>
+      <h2 ccID="13699" id="step-34---create-and-run-a-playbook-to-forward-logs-to-qradar">Step 3.4 - Create and run a playbook to forward logs to
+      QRadar</h2>
+      <p ccID="13852">To better analyze this incident it is crucial to correlate the data with other sources. For this we want to feed the logs into our
+      SIEM, QRadar.</p>
+      <p ccID="14018">As you know by now, due to the missing integration of various security tool with each other, as a security operator in charge of the
+      IDS we would now have to manually contact another team or forward our logs via e-mail. Or upload them to a FTP server, carry them over on
+      USB stick or worse. Luckily as shown in the last exercises already we can use Ansible to just configure Snort and Qradar.</p>
+      <p ccID="14439">In your VS Code online editor, create a playbook called <code ccID="14498" class=
+      "language-plaintext highlighter-rouge">incident_snort_log.yml</code> like the following:</p><!--  -->
+      <div ccID="14627" class="language-yaml highlighter-rouge">
+        <div ccID="14682" class="highlight">
+          <pre ccID="14717" class="highlight"><code ccID="14740"><span ccID="14746" class="nn">---</span>
+<span ccID="14775" class="pi">-</span> <span ccID="14801" class="na">name</span><span ccID="14829" class="pi">:</span> <span ccID="14855" class="s">Configure snort for external logging</span>
+  <span ccID="14918" class="na">hosts</span><span ccID="14947" class="pi">:</span> <span ccID="14973" class="s">snort</span>
+  <span ccID="15005" class="na">become</span><span ccID="15035" class="pi">:</span> <span ccID="15061" class="no">true</span>
+  <span ccID="15093" class="na">vars</span><span ccID="15121" class="pi">:</span>
+    <span ccID="15152" class="na">ids_provider</span><span ccID="15188" class="pi">:</span> <span ccID="15214" class="s2">&quot;</span><span ccID="15244" class="s">snort&quot;</span>
+    <span ccID="15284" class="na">ids_config_provider</span><span ccID="15327" class="pi">:</span> <span ccID="15353" class="s2">&quot;</span><span ccID="15383" class="s">snort&quot;</span>
+    <span ccID="15423" class="na">ids_config_remote_log</span><span ccID="15468" class="pi">:</span> <span ccID="15494" class="no">true</span>
+    <span ccID="15528" class="na">ids_config_remote_log_destination</span><span ccID="15585" class="pi">:</span> <span ccID="15611" class="s2">&quot;</span><span ccID="15641" class=
+"s">{{</span><span ccID="15668" class="nv"> </span><span ccID="15693" class="s">hostvars[&#39;qradar&#39;][&#39;private_ip&#39;]</span><span ccID="15764" class=
+"nv"> </span><span ccID="15791" class="s">}}&quot;</span>
+    <span ccID="15828" class="na">ids_config_remote_log_procotol</span><span ccID="15882" class="pi">:</span> <span ccID="15908" class="s">udp</span>
+    <span ccID="15940" class="na">ids_install_normalize_logs</span><span ccID="15990" class="pi">:</span> <span ccID="16016" class="no">false</span>
+
+  <span ccID="16051" class="na">tasks</span><span ccID="16080" class="pi">:</span>
+    <span ccID="16111" class="pi">-</span> <span ccID="16137" class="na">name</span><span ccID="16165" class="pi">:</span> <span ccID="16191" class="s">import ids_config role</span>
+      <span ccID="16244" class="na">include_role</span><span ccID="16280" class="pi">:</span>
+        <span ccID="16315" class="na">name</span><span ccID="16343" class="pi">:</span> <span ccID="16369" class="s2">&quot;</span><span ccID="16399" class=
+"s">ansible_security.ids_config&quot;</span>
+
+<span ccID="16461" class="pi">-</span> <span ccID="16487" class="na">name</span><span ccID="16515" class="pi">:</span> <span ccID="16541" class="s">Add Snort log source to QRadar</span>
+  <span ccID="16598" class="na">hosts</span><span ccID="16627" class="pi">:</span> <span ccID="16653" class="s">qradar</span>
+  <span ccID="16686" class="na">collections</span><span ccID="16721" class="pi">:</span>
+    <span ccID="16752" class="pi">-</span> <span ccID="16778" class="s">ibm.qradar</span>
+
+  <span ccID="16817" class="na">tasks</span><span ccID="16846" class="pi">:</span>
+    <span ccID="16877" class="pi">-</span> <span ccID="16903" class="na">name</span><span ccID="16931" class="pi">:</span> <span ccID="16957" class="s">Add snort remote logging to QRadar</span>
+      <span ccID="17022" class="na">qradar_log_source_management</span><span ccID="17074" class="pi">:</span>
+        <span ccID="17109" class="na">name</span><span ccID="17137" class="pi">:</span> <span ccID="17163" class="s2">&quot;</span><span ccID="17193" class="s">Snort</span><span ccID="17221" class=
+"nv"> </span><span ccID="17248" class="s">rsyslog</span><span ccID="17278" class="nv"> </span><span ccID="17303" class="s">source</span><span ccID="17332" class="nv"> </span><span ccID="17357" class=
+"s">-</span><span ccID="17383" class="nv"> </span><span ccID="17408" class="s">{{</span><span ccID="17433" class="nv"> </span><span ccID="17458" class=
+"s">hostvars[&#39;snort&#39;][&#39;private_ip&#39;]</span><span ccID="17530" class="nv"> </span><span ccID="17555" class="s">}}&quot;</span>
+        <span ccID="17596" class="na">type_name</span><span ccID="17629" class="pi">:</span> <span ccID="17655" class="s2">&quot;</span><span ccID="17685" class="s">Snort</span><span ccID="17713" class=
+"nv"> </span><span ccID="17740" class="s">Open</span><span ccID="17767" class="nv"> </span><span ccID="17792" class="s">Source</span><span ccID="17821" class="nv"> </span><span ccID="17846" class=
+"s">IDS&quot;</span>
+        <span ccID="17890" class="na">state</span><span ccID="17919" class="pi">:</span> <span ccID="17945" class="s">present</span>
+        <span ccID="17985" class="na">description</span><span ccID="18020" class="pi">:</span> <span ccID="18046" class="s2">&quot;</span><span ccID="18076" class="s">Snort</span><span ccID="18104" class=
+"nv"> </span><span ccID="18131" class="s">rsyslog</span><span ccID="18161" class="nv"> </span><span ccID="18186" class="s">source&quot;</span>
+        <span ccID="18231" class="na">identifier</span><span ccID="18265" class="pi">:</span> <span ccID="18291" class="s2">&quot;</span><span ccID="18321" class="s">{{</span><span ccID="18346" class=
+"nv"> </span><span ccID="18373" class="s">hostvars[&#39;snort&#39;][&#39;private_ip&#39;]|regex_replace(&#39;</span><span ccID="18463" class="se">\\</span><span ccID="18489" class=
+"s">.&#39;,&#39;-&#39;)|regex_replace(&#39;^(.*)$&#39;,</span><span ccID="18565" class="nv"> </span><span ccID="18590" class="s">&#39;ip-</span><span ccID="18621" class=
+"se">\\</span><span ccID="18649" class="s">1&#39;)</span><span ccID="18679" class="nv"> </span><span ccID="18704" class="s">}}&quot;</span>
+
+    <span ccID="18743" class="pi">-</span> <span ccID="18769" class="na">name</span><span ccID="18797" class="pi">:</span> <span ccID="18823" class="s">deploy the new log sources</span>
+      <span ccID="18880" class="na">qradar_deploy</span><span ccID="18917" class="pi">:</span>
+        <span ccID="18952" class="na">type</span><span ccID="18980" class="pi">:</span> <span ccID="19006" class="s">INCREMENTAL</span>
+      <span ccID="19048" class="na">failed_when</span><span ccID="19083" class="pi">:</span> <span ccID="19109" class="no">false</span>
+</code></pre>
+        </div>
+      </div><!--  -->
+      <p ccID="19200">This playbook should look familiar to you, it configures Snort to send logs to QRadar, configures QRadar to accept those and enables
+      an offense. Run it:</p>
+      <div ccID="19374" class="language-bash highlighter-rouge">
+        <div ccID="19429" class="highlight">
+          <pre ccID="19464" class="highlight"><code ccID="19487"><span ccID="19493" class="o">[</span>student&lt;X&gt;@ansible ~]<span ccID="19544" class=
+          "nv">$ </span>ansible-playbook incident_snort_log.yml
+</code></pre>
+        </div>
+      </div>
+      <h2 ccID="19674" id="step-35---verify-new-configuration-in-qradar">Step 3.5 - Verify new configuration in QRadar</h2>
+      <p ccID="19786">Let’s change our perspective briefly to the one of a security analyst: we mainly use the SIEM, and now logs are coming in from Snort.
+      To verify that, access your QRadar UI, open the <strong ccID="19980">Log Activity</strong> tab and validate that events are now making it to QRadar
+      from Snort.</p>
+      <p ccID="20097"><img ccID="20100" src="./Exercise%202.3%20-%20Incident%20response%20_%20workshops_files/qradar_incoming_snort_logs.png" alt=
+      "QRadar logs view, showing logs from Snort"></p>
+      <p ccID="20275">Remember that it helps to add filters to the QRadar log view to get a better overview, and that it might be necessary to change the
+      display to <strong ccID="20428">Raw Events</strong>. Note that those logs already show the offense marker on the left side!</p>
+      <blockquote ccID="20539">
+        <p ccID="20561"><strong ccID="20564">Note</strong></p>
+        <p ccID="20599">If no logs are shown, wait a bit. It might take more than a minute to show the first entries. Also, the first logs might be
+        identified with the “default” log source (showing <strong ccID="20789">SIM Generic Log DSM-7</strong> instead of <strong ccID="20839">Snort rsyslog
+        source</strong>) so give it some time.</p>
+      </blockquote>
+      <p ccID="20941">In the offenses tab filter the list of offenses for <strong ccID="20996">Error Based SQL Injection</strong>. Open the Offense summary to check the
+      details of the attacker IP address previously seen in Snort logs.</p>
+      <h2 ccID="21162" id="step-36---blacklist-ip">Step 3.6 - Blacklist IP</h2>
+      <p ccID="21230">With all these information at hand, we positively identify this event as an attack. So let’s stop it! We will blacklist the source IP
+      of the attacker.</p>
+      <p ccID="21404">In a typical environment, performing this remediation would require yet another interaction with the security operators in charge of
+      the firewalls. But we can launch an Ansible playbook to achieve the same goal in seconds rather than hours or days.</p>
+      <p ccID="21674">In your VS Code online editor, create a file called <code ccID="21729" class="language-plaintext highlighter-rouge">incident_blacklist.yml</code>.
+      Note that we do not enter the IP address here but again a variable, since Ansible already has the information from the inventory.</p>
+      <!--  -->
+      <div ccID="21976" class="language-yaml highlighter-rouge">
+        <div ccID="22031" class="highlight">
+          <pre ccID="22066" class="highlight"><code ccID="22089"><span ccID="22095" class="nn">---</span>
+<span ccID="22124" class="pi">-</span> <span ccID="22150" class="na">name</span><span ccID="22178" class="pi">:</span> <span ccID="22204" class="s">Blacklist attacker</span>
+  <span ccID="22249" class="na">hosts</span><span ccID="22278" class="pi">:</span> <span ccID="22304" class="s">checkpoint</span>
+
+  <span ccID="22343" class="na">vars</span><span ccID="22371" class="pi">:</span>
+    <span ccID="22402" class="na">source_ip</span><span ccID="22435" class="pi">:</span> <span ccID="22461" class="s2">&quot;</span><span ccID="22491" class="s">{{</span><span ccID="22516" class=
+"nv"> </span><span ccID="22543" class="s">hostvars[&#39;attacker&#39;][&#39;private_ip2&#39;]</span><span ccID="22617" class="nv"> </span><span ccID="22642" class="s">}}&quot;</span>
+    <span ccID="22679" class="na">destination_ip</span><span ccID="22717" class="pi">:</span> <span ccID="22743" class="s2">&quot;</span><span ccID="22773" class="s">{{</span><span ccID="22798" class=
+"nv"> </span><span ccID="22825" class="s">hostvars[&#39;snort&#39;][&#39;private_ip2&#39;]</span><span ccID="22896" class="nv"> </span><span ccID="22921" class="s">}}&quot;</span>
+
+  <span ccID="22958" class="na">tasks</span><span ccID="22987" class="pi">:</span>
+    <span ccID="23018" class="pi">-</span> <span ccID="23044" class="na">name</span><span ccID="23072" class="pi">:</span> <span ccID="23098" class="s">Create source IP host object</span>
+      <span ccID="23157" class="na">checkpoint_host</span><span ccID="23196" class="pi">:</span>
+        <span ccID="23231" class="na">name</span><span ccID="23259" class="pi">:</span> <span ccID="23285" class="s2">&quot;</span><span ccID="23315" class="s">asa-{{</span><span ccID="23344" class=
+"nv"> </span><span ccID="23371" class="s">source_ip</span><span ccID="23403" class="nv"> </span><span ccID="23428" class="s">}}&quot;</span>
+        <span ccID="23469" class="na">ip_address</span><span ccID="23503" class="pi">:</span> <span ccID="23529" class="s2">&quot;</span><span ccID="23559" class="s">{{</span><span ccID="23584" class=
+"nv"> </span><span ccID="23611" class="s">source_ip</span><span ccID="23643" class="nv"> </span><span ccID="23668" class="s">}}&quot;</span>
+
+    <span ccID="23707" class="pi">-</span> <span ccID="23733" class="na">name</span><span ccID="23761" class="pi">:</span> <span ccID="23787" class="s">Create destination IP host object</span>
+      <span ccID="23851" class="na">checkpoint_host</span><span ccID="23890" class="pi">:</span>
+        <span ccID="23925" class="na">name</span><span ccID="23953" class="pi">:</span> <span ccID="23979" class="s2">&quot;</span><span ccID="24009" class="s">asa-{{</span><span ccID="24038" class=
+"nv"> </span><span ccID="24065" class="s">destination_ip</span><span ccID="24102" class="nv"> </span><span ccID="24127" class="s">}}&quot;</span>
+        <span ccID="24168" class="na">ip_address</span><span ccID="24202" class="pi">:</span> <span ccID="24228" class="s2">&quot;</span><span ccID="24258" class="s">{{</span><span ccID="24283" class=
+"nv"> </span><span ccID="24310" class="s">destination_ip</span><span ccID="24347" class="nv"> </span><span ccID="24372" class="s">}}&quot;</span>
+
+    <span ccID="24411" class="pi">-</span> <span ccID="24437" class="na">name</span><span ccID="24465" class="pi">:</span> <span ccID="24491" class=
+"s">Create access rule to deny access from source to destination</span>
+      <span ccID="24584" class="na">checkpoint_access_rule</span><span ccID="24630" class="pi">:</span>
+        <span ccID="24665" class="na">auto_install_policy</span><span ccID="24708" class="pi">:</span> <span ccID="24734" class="s">yes</span>
+        <span ccID="24770" class="na">auto_publish_session</span><span ccID="24814" class="pi">:</span> <span ccID="24840" class="s">yes</span>
+        <span ccID="24876" class="na">layer</span><span ccID="24905" class="pi">:</span> <span ccID="24931" class="s">Network</span>
+        <span ccID="24971" class="na">position</span><span ccID="25003" class="pi">:</span> <span ccID="25029" class="s">top</span>
+        <span ccID="25065" class="na">name</span><span ccID="25093" class="pi">:</span> <span ccID="25119" class="s2">&quot;</span><span ccID="25149" class="s">asa-accept-{{</span><span ccID="25185" class=
+"nv"> </span><span ccID="25212" class="s">source_ip</span><span ccID="25244" class="nv"> </span><span ccID="25269" class="s">}}-to-{{</span><span ccID="25300" class="nv"> </span><span ccID="25325" class=
+"s">destination_ip</span><span ccID="25364" class="nv"> </span><span ccID="25389" class="s">}}&quot;</span>
+        <span ccID="25430" class="na">source</span><span ccID="25460" class="pi">:</span> <span ccID="25486" class="s2">&quot;</span><span ccID="25516" class="s">asa-{{</span><span ccID="25545" class=
+"nv"> </span><span ccID="25572" class="s">source_ip</span><span ccID="25604" class="nv"> </span><span ccID="25629" class="s">}}&quot;</span>
+        <span ccID="25670" class="na">destination</span><span ccID="25705" class="pi">:</span> <span ccID="25731" class="s2">&quot;</span><span ccID="25761" class="s">asa-{{</span><span ccID="25790" class=
+"nv"> </span><span ccID="25817" class="s">destination_ip</span><span ccID="25854" class="nv"> </span><span ccID="25879" class="s">}}&quot;</span>
+        <span ccID="25920" class="na">action</span><span ccID="25950" class="pi">:</span> <span ccID="25976" class="s">drop</span>
+
+    <span ccID="26011" class="pi">-</span> <span ccID="26037" class="na">name</span><span ccID="26065" class="pi">:</span> <span ccID="26091" class="s">Install policy</span>
+      <span ccID="26136" class="na">cp_mgmt_install_policy</span><span ccID="26182" class="pi">:</span>
+        <span ccID="26217" class="na">policy_package</span><span ccID="26255" class="pi">:</span> <span ccID="26281" class="s">standard</span>
+        <span ccID="26322" class="na">install_on_all_cluster_members_or_fail</span><span ccID="26384" class="pi">:</span> <span ccID="26410" class="s">yes</span>
+      <span ccID="26444" class="na">failed_when</span><span ccID="26479" class="pi">:</span> <span ccID="26505" class="no">false</span>
+</code></pre>
+        </div>
+      </div><!--  -->
+      <p ccID="26596">Run the playbook, to effectively blacklist the IP:</p>
+      <div ccID="26661" class="language-bash highlighter-rouge">
+        <div ccID="26716" class="highlight">
+          <pre ccID="26751" class="highlight"><code ccID="26774"><span ccID="26780" class="o">[</span>student&lt;X&gt;@ansible ~]<span ccID="26831" class=
+          "nv">$ </span>ansible-playbook incident_blacklist.yml
+</code></pre>
+        </div>
+      </div>
+      <p ccID="26961">In your QRadar UI, verify in the Log Activity tab that you do not receive any more alerts from Snort. Note that, if you would have
+      connected the firewall to QRadar, there would actually be logs coming in from there.</p>
+      <p ccID="27198">Also, let’s quickly verify that the new rule was added to Check Point: Access the Windows workstation and open the SmartConsole
+      interface. On the left side, click on <strong ccID="27376">SECURITY POLICIES</strong> and note that the access control policy entry changed from
+      <strong ccID="27477">Accept</strong> to <strong ccID="27504">Drop</strong>.</p>
+      <p ccID="27538"><img ccID="27541" src="./Exercise%202.3%20-%20Incident%20response%20_%20workshops_files/check_point_policy_drop.png" alt=
+      "SmartConsole Blacklist Policy"></p>
+      <p ccID="27701">You have successfully identified an attack and blocked the traffic behind the attack!</p>
+      <h2 ccID="27801" id="step-37---roll-back">Step 3.7 - Roll back</h2>
+      <p ccID="27863">As the final step, we can run the rollback playbook to undo the Snort configuration, reducing resource consumption and the analysis
+      workload.</p>
+      <p ccID="28026">Execute the playbook <code ccID="28050" class="language-plaintext highlighter-rouge">rollback.yml</code> we wrote in the last exercise to roll all
+      changes back.</p>
+      <div ccID="28195" class="language-bash highlighter-rouge">
+        <div ccID="28250" class="highlight">
+          <pre ccID="28285" class="highlight"><code ccID="28308"><span ccID="28314" class="o">[</span>student&lt;X&gt;@ansible ~]<span ccID="28365" class=
+          "nv">$ </span>ansible-playbook rollback.yml
+</code></pre>
+        </div>
+      </div>
+      <p ccID="28485">Note here that the playbook runs through without problems - even though we did not configure Check Point as a log source for QRadar
+      this time! This is possible since Ansible tasks are most often idempotent: they can be run again and again, ensuring the desired
+      state.</p>
+      <p ccID="28781">Also we need to kill the process sending out attack. From the terminal of your VS Code online editor, execute the follwing Ansible
+      ad-hoc command:</p><!--  -->
+      <div ccID="28958" class="language-bash highlighter-rouge">
+        <div ccID="29013" class="highlight">
+          <pre ccID="29048" class="highlight"><code ccID="29071"><span ccID="29077" class="o">[</span>student1@ansible ~]<span ccID="29120" class="nv">$ </span>ansible attacker <span ccID="29163" class=
+          "nt">-b</span> <span ccID="29202" class="nt">-m</span> shell <span ccID="29235" class="nt">-a</span> <span ccID="29262" class=
+          "s2">&quot;sleep 2;ps -ef | grep -v grep | grep -w /usr/bin/watch | awk &#39;{print </span><span ccID="29377" class="nv">$2</span><span ccID="29403" class=
+          "s2">}&#39;|xargs kill &amp;&gt;/dev/null; sleep 2&quot;</span>
+attacker | CHANGED | <span ccID="29513" class="nv">rc</span><span ccID="29539" class="o">=</span>0 <span ccID="29565" class="o">&gt;&gt;</span>
+</code></pre>
+        </div>
+      </div><!--  -->
+      <p ccID="29658">If you get an error saying <code ccID="29688" class="language-plaintext highlighter-rouge">Share connection to ... closed.</code>, don’t worry:
+      just execute the command again.</p>
+      <p ccID="29844">You are done with this last exercise. Congratulations!</p>
+      <h2 ccID="29913" id="step-38---wrap-it-all-up">Step 3.8 - Wrap it all up</h2>
+      <p ccID="29985">It happens that the job of a CISO and her team is difficult even if they have in place all necessary tools, because the tools don’t
+      integrate with each other. When there is a security breach, an analyst has to perform a triage, chasing all relevant piece of information
+      across the entire infrastructure, taking days to understand what’s going on and ultimately perform any sort of remediation.</p>
+      <p ccID="30411">Ansible Security Automation is a Red Hat initiative to facilitate the integration of a wide range of security solutions through a
+      common and open automation language: Ansible. Ansible Security Automation is designed to help security analysts investigate and remediate
+      security incidents faster.</p>
+      <p ccID="30734">This is how ansible security automation can integrate three different security products, an enterprise firewall, an IDS, and a SIEM,
+      to help security analysts and operators in investigation enrichment, threat hunting and incident response.</p>
+      <p ccID="30995">Ansible Security Automation allows security organizations to create pre-approved automation workflows, called playbooks, that can be
+      maintained centrally and shared across different teams. And with the help of Tower, we can even provide those automation workflows to
+      other teams in a controlled, user friendly and simple to consume way.</p>
+      <hr ccID="31360">
+      <p ccID="31372"><a ccID="31375" href="./index.html#section-2---ansible-security-automation-use-cases">Click Here to return</a></p>
+    </section>
+    <footer ccID="31498">
+      <div ccID="31514" class="footer-container">
+        <a ccID="31554" href="https://redhat.com/"><img ccID="31584" class="footer-logo" src="./images/redhat-logo.svg" title="Red Hat" alt="Red Hat"></a> <a ccID="31675" href=
+        "https://www.cgsinc.com/en/learning" target="_new&quot;"><img ccID="31750" class="header-logo" src="./images/cgsinc-logo.png" title=
+        "CGS Inc. Learning" alt="CGS Inc. Learning"></a> <a ccID="31871" class="header-link" href="index.html">Home</a>
+        <p ccID="31930" class="footer-copyright">Copyright © 2020 Red Hat, Inc.</p>
+        <div ccID="32003" class="footer-linkContainer">
+          <a ccID="32049" href="https://www.redhat.com/en/about/privacy-policy" class="footer-link">Privacy statement</a> <span ccID="32148" class=
+          "footer-linkSpacer">|</span> <a ccID="32201" href="https://www.ansible.com/security?hsLang=en-us" class="footer-link">Security disclosure</a>
+          <span ccID="32312" class="footer-linkSpacer">|</span> <a ccID="32353" href="https://www.redhat.com/en/about/all-policies-guidelines" class="footer-link">All
+          policies and guidelines</a>
+        </div>
+      </div>
+    </footer>
+  </div><!--[if !IE]><script>fixScale(document);</script><![endif]-->
+</body>
+</html>
