@@ -46,9 +46,12 @@
 <p>We have set up a common set of security related tools:</p>
 
 <ul>
+  <li>a Firewall, in this case <a href="https://www.checkpoint.com/quantum/next-generation-firewall/">Check Point Next Generation Firewall</a></li>
   <li>a Security Information and Event Management (SIEM), here <a href="https://www.ibm.com/security/security-intelligence/qradar">QRadar</a></li>
-  <li>a platform for Automation here <a href="https://https://www.redhat.com/en/technologies/management/ansible/try-it">Read Hat Ansible Automation Paltform</a></li>
+  <li>a Intrusion Detection & Prevention System, here <a href="https://www.snort.org/">Snort</a></li>
 </ul>
+ 
+<p>We will automate the remediation of the incidents found by the tools above, using the <a href="https://https://www.redhat.com/en/technologies/management/ansible/try-it">Read Hat Ansible Automation Platform</a>
 
 <p>The exercises of the first section of this lab guide you through each individual solution mentioned above. You will learn how to access them, what they are used for and how to interact with them using Ansible.</p>
 
@@ -56,19 +59,35 @@
 
 <h2 id="step-10---qradar">Step 1.1 - QRadar - Architecture of the QRadar SIEM</h2>
 
-<p>In this lab you work in a pre-configured lab environment. You will have access to the following hosts and services:</p>
+<p>In this lab you work in a pre-configured lab environment. You will have access to the following assets and versions</p>
 
-<p>TODO: continue...</p>
+<table>
+  <thead>
+    <tr>
+      <th>Asset</th>
+      <th>Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>IBM QRadar</td>
+      <td>Community Edition (CE) v7.4</td>
+  </tbody>
+</table>
 
 <h2 id="step-111---qradar">Step 1.1.1 - QRadar side installation</h2>
 
-<p>If you want to try QRadar in your own setup, install the Coomunity Edition, or apply for a Cloud trail.</p>
+<p>If you want to try QRadar in your own setup, install the limited Community Edition (CE) ova (using a virtual machine), or apply for a Cloud trial. 
+You will be able to recreate this lab with the CE edition, the Cloud one only gives you access using a browser.</p>
 
-<p>TODO: continue...</p>
+<ul>
+  <li><a href="https://www.ibm.com/community/qradar/ce/" target="_new">QRadar Community Edition (CE) Trial (limited events, etc)</a></li>
+  <li><a href="https://www.ibm.com/account/reg/us-en/signup?formid=urx-30209">QRadar on Cloud Free Trial (full, limited time</a></li>
+</ul> 
 
 <h2 id="step-12---architecture-of-the-lab-nodes-and-services">Step 1.2 - Ansible - Architecture of the lab, Nodes and Services</h2>
 
-<p>In this lab you work in a pre-configured lab environment. You will have access to the following hosts and services:</p>
+<p>When working with a pre-configured lab environment, you will have access to the following hosts and services:</p>
 
 <table>
   <thead>
