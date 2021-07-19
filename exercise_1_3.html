@@ -122,7 +122,7 @@
       <p>The purpose of the provided sample script is to write a file named test.txt each time all rule tests are matched in a sample rule.</p>
       <ol>
         <li>Create a file with a .sh extension using the provided sample script:
-          <pre>  <code class="hljs javascript">#!<span class="hljs-regexp">/bin/</span>bash  datetime=<span class=
+          <pre class="highlight">  <code class="hljs javascript">#!<span class="hljs-regexp">/bin/</span>bash  datetime=<span class=
           "hljs-string">&quot;$(date)&quot;</span>  echo <span class=
           "hljs-string">&quot;  Custom Action Script Test Time: $datetime&quot;</span> &gt;&gt; <span class=
           "hljs-regexp">/home/</span>customactionuser/test.txt  echo <span class=
@@ -177,14 +177,14 @@
         <li>If you have your own environment, use SSH to log in to the Console as the root user. You can't do this with the Lab environment, as you
 		do not have root ssh access</li>
         <li>To enter the shell to see the folder <em>customactionuser</em> use the <strong>chroot</strong> command:
-          <pre><code class="hljs sql">  chroot <span class=
+          <pre class="highlight"><code class="hljs sql">  chroot <span class=
           "hljs-comment">--userspec=customactionuser /opt/qradar/bin/ca_jail/</span></code></pre>
         </li>
         <li>Use the ls command to see if the file exists<strong>:</strong>
-          <pre>  <code class="hljs coffeescript">  ls -lh <span class="hljs-regexp">/home/customactionuser/</span></code></pre>
+          <pre class="highlight">  <code class="hljs coffeescript">  ls -lh <span class="hljs-regexp">/home/customactionuser/</span></code></pre>
         </li>
         <li>&nbsp;While in the chroot&#39;ed shell, the file <strong>test.txt</strong> should be seen.
-          <pre>  <code class="hljs coffeescript"> chroot --userspec=customactionuser <span class=
+          <pre class="highlight">  <code class="hljs coffeescript"> chroot --userspec=customactionuser <span class=
           "hljs-regexp">/opt/qradar/bin/ca_jail/</span>  $ ls <span class=
           "hljs-regexp">/home/customactionuser/</span>  test.txt?</code></pre><strong>Results</strong><br>
           The file <em>test.txt</em> should exist in the <em>/home/customactionuser/</em> directory. The purpose of the sample script is to
