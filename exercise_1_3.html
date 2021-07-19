@@ -90,12 +90,33 @@
       which are already installed on the system: in the <strong>Offenses</strong> window, on the left side in the navigation bar, click on
       <strong>Rules</strong>. A long list of rules is displayed. In the search bar on top of this list, enter the following search term:
       <code class="language-plaintext highlighter-rouge">DDoS</code> Hit enter afterwards to filter the list.</p>
-      <p>The list is filtered, and only shows few rules which are related to DDOS.</p>
-      <p><img src="./images/qradar-offenses-rules.png" alt="QRadar, filtered rules list"></p>
-      <p>Click the one called <strong>“Potential DDoS Against Single Host (TCP)”</strong>, note that it is enabled. This will be relevant later
+      <p>The list is filtered, and only shows few rules which are related to DDOS. Click the one called <strong>“Potential DDoS Against Single Host (TCP)”</strong>, note that it is enabled. This will be relevant later
       in this exercise.</p>
+      <p><img src="./images/qradar_offenses.png" alt="QRadar, filtered rules list"></p>
 	  	  
-      <h2 id="step-3---check-point-next-generation-firewall">Step 3 - Create a test script</h2>
+      <h2 id="step-3---check-point-next-generation-firewall">Step 3 - Create a QRadar Custom Action Script</h2>
+	  
+	  <p>Incident Remedition happens in QRadar when some events create an offense, and we do something about it. We can attach scripts to 
+	  custom rules to do specific actions in response to network events. Use the Custom Action window to manage custom action scripts. 
+	  Use custom actions to select or define the value that is passed to the script and the resulting action.</p>
+
+      <p>For example, you can write a script to create a firewall rule that blocks a source IP address from your network in response to 
+	  a rule that is triggered by a defined number of failed login attempts.</p>
+
+      <p>The following examples are custom actions that are the outcomes of passing values to a script:</p>
+	  
+      <ul>
+        <li>Block users and domains.<br>
+        <li>Initiate work flows and updates in external systems.<br>
+        <li>Block users and domains.<br>
+
+      </ul>	  
+	  
+	  <p>Custom actions work best with low volume custom rule events and with custom rules that have a low response limiter value.
+      
+	  <p>This does not come defaulted in Qradar, to use this capability, a Custom Action Script needs to be created and a Custom Rule can be configured to fire the Custom Action Script. 
+	  When the Rule is triggered, there will be no clear indication that the Custom Action Script is running. But we can test the script.</p>
+	  
       <p>The purpose of the provided sample script is to write a file named test.txt each time all rule tests are matched in a sample rule.</p>
       <ol>
         <li>Create a file with a .sh extension using the provided sample script:
@@ -137,8 +158,8 @@
       <h2 id="step-5---check-point-next-generation-firewall">Step 5 - Confirm your custom action script triggers</h2>
       <p>Either by using &quot;Test Execution&quot; in the Define Actions window, or by confirming the Custom Rule has been triggered, verify
       the test file is created or updated:</p>
-      <p><span id="cke_bm_1199S" style="display: none;">&nbsp;</span><br>
-      <strong>To test your custom action in the user interface</strong></p>
+ 
+      <strong>To test your custom action in the user interface</strong>
       <ol>
         <li>Click the <strong>Admin</strong> tab.</li>
         <li>Scroll to down to <strong>Custom Actions</strong>.</li>
@@ -146,14 +167,15 @@
         <li>Highlight the test script.</li>
         <li>Click <strong>Test Execution</strong> &gt; <strong>Execute</strong>.<br>
         <img alt="image-20180713125625-4" data-entity-type="file" data-entity-uuid="c00818d8-7e27-4ad4-803b-f7db6fbf420f" height="508" src=
-        "./images/image-20180713125625-4.png" width="554"><br></li>
+        "./images/image-20180713125625-4.png" width="554"></li>
       </ol>
-      <p><strong>How to verify the test script in the command line</strong></p>
+      <strong>How to verify the test script in the command line</strong></p>
       <ol>
-        <li>Create an event to cause the custom rule to trigger.&nbsp;</li>
-        <li>Use SSH to log in to the Console as the root user.</li>
+        <li>Create an event to cause the custom rule to trigger.</li>
+        <li>If you have your own environment, use SSH to log in to the Console as the root user. You can't do this with the Lab environment, as you
+		do not have root ssh access</li>
         <li>To enter the shell to see the folder <em>customactionuser</em> use the <strong>chroot</strong> command:
-          <pre>  <code class="hljs sql">  chroot <span class=
+          <pre><code class="hljs sql">  chroot <span class=
           "hljs-comment">--userspec=customactionuser /opt/qradar/bin/ca_jail/</span></code></pre>
         </li>
         <li>Use the ls command to see if the file exists<strong>:</strong>
@@ -167,7 +189,47 @@
           write test.txt each time the rule response is triggered by a rule.
         </li>
       </ol>
+	  
+      <h2 id="step-5">Step 5- Passing parameters to a custom action script</h2>
+	  <p> The following information is taken from <a href="https://www.ibm.com/docs/en/qsip/7.3.2?topic=actions-passing-parameters-custom-action-script" target="_blank">this link.</a>
+	  Go there if need to copy and paste the scripts as text.
+	  
+	  <p>We are not going to exercise these scripts on this Lab, therefore the following is just FYI.
+	  	  
+	  <p>The Custom Action script functionality in QRadar was intended to allow admins to generate rule responses based off of data ingested 
+	  in QRadar. However, QRadar prevents scripts taking actions on the box that would cause performance issues or to make changes on 
+	  the appliance. All Custom Actions run within a jailshell, so you can pass data out of QRadar by setting parameters.	  
 
+	  <p>The Scripts can be written in Bash, Python, and Perl. Here we how how to pass parameters to custom action scripts.
+
+      <p>The following simple sample scripts show how to query the asset model API for an asset with the supplied offense source IP address. For the sake of this example, the scripts output the JSON that is returned by the endpoint.
+      
+      <p>The scripts require three parameters:
+    
+      <ol>
+        <li>Console IP address.</li>
+		<li>API token.</li>
+		<li>Offense source IP address.</li>
+      </ol>
+ 
+ 	  <p>These parameters are configured in the Define Custom Action window Script Parameters area:
+	  
+	  <img class="" src="./images/definecustomaction.png" title="Define Custom Action" alt="Define Custom Action">
+	  
+	  <p>Each parameter is passed to the script in the order in which it was added in the Define Custom Action window. In this case:
+      <ol>
+        <li>console_ip.</li>
+		<li>api_token.</li>
+		<li>offense_source_ip.</li>
+      </ol>
+	  
+	  <p>The variables that are defined at the beginning of each of the sample scripts use the sample parameter names that were added 
+	  in the Define Custom Action window.
+	  
+	  <img class="" src="./images/figure2.png" title="Define Custom Action" alt="Define Custom Action">
+	  <img class="" src="./images/figure3.png" title="Define Custom Action" alt="Define Custom Action">
+	  <img class="" src="./images/figure4.png" title="Define Custom Action" alt="Define Custom Action"> 
+	  
       <hr>
 	  
 	  <p>You are done with the exercise. You can now <a href="./index.html#section-1">turn back to the list of exercises</a> or 
