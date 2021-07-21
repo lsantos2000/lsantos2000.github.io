@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/ -->
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Exercise 1.3 - Executing the first Snort playbook | workshops</title>
+<meta name="generator" content="Jekyll v3.9.0">
+<meta property="og:title" content="Exercise 1.3 - Executing the first Snort playbook">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Training Course for Ansible Automation Platform">
+<meta property="og:description" content="Training Course for Ansible Automation Platform">
+<link rel="canonical" href="https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/">
+<meta property="og:url" content="https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/">
+<meta property="og:site_name" content="workshops">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Exercise 1.3 - Executing the first Snort playbook">
+<script type="application/ld+json">
+{"description":"Training Course for Ansible Automation Platform","url":"https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/","@type":"WebPage","headline":"Exercise 1.3 - Executing the first Snort playbook","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/style.css">
+    <script src="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/scale.fix.js.download"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <div class="header-container">
+          <a href="https://ansible.com/">
+            <img class="header-logo" src="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/redhat-ansible-logo.svg" title="Red Hat Ansible" alt="Red Hat Ansible">
+          </a>
+          <a class="header-link" href="https://ansible.github.io/workshops/">
+            Workshops Home
+          </a>
+        </div>
+      </header>
+
+      <section>
+        <h1 id="exercise-13---executing-the-first-snort-playbook">Exercise 1.3 - Executing the first Snort playbook</h1>
+
+<p><strong>Read this in other languages</strong>: <br>
+<a href="https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/README.md"><img src="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/uk.png" alt="uk"> English</a>,  <a href="https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/README.ja.md"><img src="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/japan.png" alt="japan"> 日本語</a>, <a href="https://ansible.github.io/workshops/exercises/ansible_security/1.3-snort/README.fr.md"><img src="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/fr.png" alt="france"> Français</a>.<br></p>
+
+<h2 id="step-31---snort">Step 3.1 - Snort</h2>
+
+<p>To showcase how to automate a network intrusion detection and intrusion prevention system in a security environment, this lab will take you through managing a Snort IDS instance. Snort analyzes network traffic and compares it against some given rule set.
+In this lab, Snort is installed on a Red Hat Enterprise Linux machine and Ansible interacts with it by accessing the RHEL node over SSH.</p>
+
+<h2 id="step-32---accessing-the-snort-server">Step 3.2 - Accessing the Snort server</h2>
+
+<p>In order to connect to the Snort installation, we need to to find the IP address of the machine it is installed on. You can then get the IP address of the Snort machine by looking up the information on the inventory file <code class="language-plaintext highlighter-rouge">~/lab_inventory/hosts</code>. In your VS Code online editor, in the menu bar click on <strong>File</strong> &gt; <strong>Open File…</strong> and open the file <code class="language-plaintext highlighter-rouge">/home/student&lt;X&gt;/lab_inventory/hosts</code>. Search and find the entry for snort which looks like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>snort <span class="nv">ansible_host</span><span class="o">=</span>22.333.44.5 <span class="nv">ansible_user</span><span class="o">=</span>ec2-user <span class="nv">private_ip</span><span class="o">=</span>172.16.1.2
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>NOTE</strong></p>
+
+  <p>The IP addresses here are for demo purposes and will be different in your case. You have your own dedicated Snort setup in your individual lab environment.</p>
+</blockquote>
+
+<p>Once you find the IP address, it’s time to access the Snort server. The connection uses a SSH key pre-installed on the control host, the user for the Snort server is <code class="language-plaintext highlighter-rouge">ec2-user</code>. In your VS Code online editor, open a terminal and access the snort server via:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student&lt;X&gt;@ansible ~]<span class="nv">$ </span>ssh ec2-user@22.333.44.5
+Warning: Permanently added <span class="s1">'22.333.44.5'</span> <span class="o">(</span>ECDSA<span class="o">)</span> to the list of known hosts.
+Last login: Mon Aug 26 12:17:48 2019 from h-213.61.244.2.host.de.colt.net
+<span class="o">[</span>ec2-user@ip-172-16-1-2 ~]<span class="err">$</span>
+</code></pre></div></div>
+
+<p>To verify snort is installed and configured properly, you can call it via sudo and ask for the version:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>ec2-user@ip-172-16-1-2 ~]<span class="nv">$ </span><span class="nb">sudo </span>snort <span class="nt">--version</span>
+
+   ,,_     -<span class="k">*</span><span class="o">&gt;</span> Snort! &lt;<span class="k">*</span>-
+  o<span class="s2">"  )~   Version 2.9.13 GRE (Build 15013)
+   ''''    By Martin Roesch &amp; The Snort Team: http://www.snort.org/contact#team
+           Copyright (C) 2014-2019 Cisco and/or its affiliates. All rights reserved.
+           Copyright (C) 1998-2013 Sourcefire, Inc., et al.
+           Using libpcap version 1.5.3
+           Using PCRE version: 8.32 2012-11-30
+           Using ZLIB version: 1.2.7
+</span></code></pre></div></div>
+
+<p>Also, check if the service is actively running via <code class="language-plaintext highlighter-rouge">sudo systemctl</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>ec2-user@ip-172-16-1-2 ~]<span class="nv">$ </span><span class="nb">sudo </span>systemctl status snort
+● snort.service - Snort service
+   Loaded: loaded <span class="o">(</span>/etc/systemd/system/snort.service<span class="p">;</span> enabled<span class="p">;</span> vendor preset: disabled<span class="o">)</span>
+   Active: active <span class="o">(</span>running<span class="o">)</span> since Mon 2019-08-26 17:06:10 UTC<span class="p">;</span> 1s ago
+ Main PID: 17217 <span class="o">(</span>snort<span class="o">)</span>
+   CGroup: /system.slice/snort.service
+           └─17217 /usr/sbin/snort <span class="nt">-u</span> root <span class="nt">-g</span> root <span class="nt">-c</span> /etc/snort/snort.conf <span class="nt">-i</span> eth0 <span class="nt">-p</span> <span class="nt">-R</span> 1 <span class="nt">--pid-path</span><span class="o">=</span>/var/run/snort <span class="nt">--no-interface-pidfile</span> <span class="nt">--nolock-pidfile</span>
+<span class="o">[</span>...]
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>NOTE</strong></p>
+
+  <p>It might happen that the snort service is not running. In this demo environment this is not a problem, if that is the case, restart it with <code class="language-plaintext highlighter-rouge">systemctl restart snort</code> and check the status again. It should be running.</p>
+</blockquote>
+
+<p>Exit the Snort server now by pressing <code class="language-plaintext highlighter-rouge">CTRL</code> and <code class="language-plaintext highlighter-rouge">D</code>, or by typing <code class="language-plaintext highlighter-rouge">exit</code> on the command line. All further interaction will be done via Ansible from the Ansible control host.</p>
+
+<h2 id="step-33---simple-snort-rules">Step 3.3 - Simple Snort rules</h2>
+
+<p>In the most basic capacity, Snort works by reading some rules and acting according to them. In this lab, we will be working with some simple examples of Snort in order to show how to automate this configuration with Ansible. This session is not designed to dive into the specifics of Snort rules and the complexity involved in large setups, however, it is helpful to understand the basic structure of a simple rule so that you are aware of what you are automating.</p>
+
+<p>A rule consists of a rule header and rule options and is saved in files.</p>
+
+<p>The Snort rule header breaks down into:</p>
+
+<ul>
+  <li>an action</li>
+  <li>the protocol to look for like TCP</li>
+  <li>source information like IP and port</li>
+  <li>destination information like IP and port</li>
+</ul>
+
+<p>The Snort rule options are keywords separated by <code class="language-plaintext highlighter-rouge">;</code> and can be:</p>
+
+<ul>
+  <li>messages to output when a rule matches</li>
+  <li>SID, a unique identifier of the rule</li>
+  <li>content to search for in the packet payload, for example a suspicious string</li>
+  <li>or byte tests to check for binary data</li>
+  <li>a revision of the rule</li>
+  <li>the severity of the attack, called “priority”</li>
+  <li>a pre-defined attack type called “classtype” to better group the rule with other rules</li>
+  <li>and others.</li>
+</ul>
+
+<p>Not all options are mandatory, some also only override existing default values.</p>
+
+<p>A Snort rule’s outline is as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[action][protocol][sourceIP][sourceport] -&gt; [destIP][destport] ( [Rule options] )
+</code></pre></div></div>
+
+<p>If you want to learn more about Snort rules, check out the <a href="https://www.snort.org/documents/snort-rule-infographic">Snort Rule Infographic</a> or dive into the <a href="https://www.snort.org/documents/snort-users-manual">Snort Users Manual (PDF)</a>. If you want to have a look at some real Snort rules you can also access the Snort installation in your lab and look at the content of the <code class="language-plaintext highlighter-rouge">/etc/snort/rules</code> directory.</p>
+
+<h2 id="step-34---example-playbook">Step 3.4 - Example playbook</h2>
+
+<p>As discussed earlier, Ansible automation is described in playbooks. Playbooks consist of tasks. Each task uses a module and the module’s corresponding parameters to describe the change that needs to be done or the state that is desired.</p>
+
+<p>Ansible releases are shipped with a set of modules, however, in Ansible 2.9 there are no modules to interact with Snort yet. For this reason we wrote a set of modules for managing Snort. This way, we can provide value without having to wait for a new Ansible release. Also, we are able to update our modules faster. This is especially important in the early life of a newly developed module.</p>
+
+<p>These Snort modules are shipped as part of a “role”. To better describe a role, think about how you wrote your playbook in the last section. While it is possible to write a playbook in one file as we did earlier, often writing all automation pieces in one place results in creating long, complicated playbooks. At some point you will want to reuse the automation content you wrote in your playbooks already. Therefore, you will need to organize things in a way to get multiple smaller playbooks to work together. Ansible Roles are the way we achieve this. When you create a role, you deconstruct your playbook into parts and those parts sit in a directory structure.</p>
+
+<p>There are multiple advantages in using roles to write your automation. The most notable is that the complexity and playbook intelligence is hidden from the user. The other important advantage is that roles can be easily shared and re-used.</p>
+
+<p>Back to the Snort use case: as mentioned, the Snort modules are shipped as part of a role. This role is called <a href="https://github.com/ansible-security/ids_rule">ids_rule</a>. Open the Github repository link in the web browser, click on the <a href="https://github.com/ansible-security/ids_rule/tree/master/library">library</a> path. You will find the module <code class="language-plaintext highlighter-rouge">snort_rule.py</code> there. This module shipped as a part of the ids_rule role, can create and change snort rules.</p>
+
+<p>If you take a closer look at the role you’ll see that it comes with a re-usable playbook at <a href="https://github.com/ansible-security/ids_rule/blob/master/tasks/snort.yml">tasks/snort.yml</a>.</p>
+
+<p>Let’s have a look at how this playbook can be re-written to use the roles directly. To do this, we first need to download and install the role on our control host. There are several ways to do this but a very convenient way is the command line tool <code class="language-plaintext highlighter-rouge">ansible-galaxy</code>. This tool installs roles directly from the archives, Git URLs and from <a href="https://galaxy.ansible.com/">Ansible Galaxy</a>. Ansible Galaxy is a community hub for finding and sharing Ansible content. It provides features like rating, quality testing, proper searching and so on. For example, the role mentioned above can be found in Ansible Galaxy at <a href="https://galaxy.ansible.com/ansible_security/ids_rule">ansible_security/ids_rule</a>.</p>
+
+<p>On the command line, you can use the <code class="language-plaintext highlighter-rouge">ansible-galaxy</code> tool to download and install the <code class="language-plaintext highlighter-rouge">ids_rule</code> role with a single command. Execute the following command in a terminal of your VS Code online editor:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student&lt;X&gt;@ansible ~]<span class="nv">$ </span>ansible-galaxy <span class="nb">install </span>ansible_security.ids_rule
+- downloading role <span class="s1">'ids_rule'</span>, owned by ansible_security
+- downloading role from https://github.com/ansible-security/ids_rule/archive/master.tar.gz
+- extracting ansible_security.ids_rule to /home/student&lt;X&gt;/.ansible/roles/ansible_security.ids_rule
+- ansible_security.ids_rule <span class="o">(</span>master<span class="o">)</span> was installed successfully
+</code></pre></div></div>
+
+<p>As you see the role is installed to the roles default path, <code class="language-plaintext highlighter-rouge">~/.ansible/roles/</code>.It was prefixed by <code class="language-plaintext highlighter-rouge">ansible_security</code>, this is the name of the project used for security roles, such as what we are using in this lab.</p>
+
+<p>Now that we have the role installed on our control host, we can use it in a playbook. In order to use the role, create a new file called <code class="language-plaintext highlighter-rouge">add_snort_rule.yml</code> in your VS Code online editor. Save it in the home directory of your user, and add the name <code class="language-plaintext highlighter-rouge">Add Snort rule</code> and target hosts, here <code class="language-plaintext highlighter-rouge">snort</code>. Since we need root rights to make any changes on Snort, add the <code class="language-plaintext highlighter-rouge">become</code> flag so that Ansible would take care of privilege escalation.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add Snort rule</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">snort</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="s">yes</span>
+</code></pre></div></div>
+
+<p>Next we need to add the variables required by our playbook. The role we are using is written in a way that can work with multiple IDS providers, all the user needs to provide is the name of the IDS and the role will take care of the rest. Since we are managing a Snort IDS, we need to set the value of <code class="language-plaintext highlighter-rouge">ids_provider</code> variable to <code class="language-plaintext highlighter-rouge">snort</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add Snort rule</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">snort</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="s">yes</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">ids_provider</span><span class="pi">:</span> <span class="s">snort</span>
+</code></pre></div></div>
+
+<p>Next, we need to add the tasks. Tasks are the components which make the actual changes on the target machines. Since we are using a role, we can simply use a single step in our tasks, <code class="language-plaintext highlighter-rouge">include_role</code>, to add it to our playbook. In order to make the role suitable for our use case, we add the following task-specific variables:</p>
+
+<ul>
+  <li>the actual rule</li>
+  <li>the Snort rules file</li>
+  <li>the state of the rule, present or absent</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add Snort rule</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">snort</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="s">yes</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">ids_provider</span><span class="pi">:</span> <span class="s">snort</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add snort password attack rule</span>
+      <span class="na">include_role</span><span class="pi">:</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">ansible_security.ids_rule"</span>
+      <span class="na">vars</span><span class="pi">:</span>
+        <span class="na">ids_rule</span><span class="pi">:</span> <span class="s1">'</span><span class="s">alert</span><span class="nv"> </span><span class="s">tcp</span><span class="nv"> </span><span class="s">any</span><span class="nv"> </span><span class="s">any</span><span class="nv"> </span><span class="s">-&gt;</span><span class="nv"> </span><span class="s">any</span><span class="nv"> </span><span class="s">any</span><span class="nv"> </span><span class="s">(msg:"Attempted</span><span class="nv"> </span><span class="s">/etc/passwd</span><span class="nv"> </span><span class="s">Attack";</span><span class="nv"> </span><span class="s">uricontent:"/etc/passwd";</span><span class="nv"> </span><span class="s">classtype:attempted-user;</span><span class="nv"> </span><span class="s">sid:99000004;</span><span class="nv"> </span><span class="s">priority:1;</span><span class="nv"> </span><span class="s">rev:1;)'</span>
+        <span class="na">ids_rules_file</span><span class="pi">:</span> <span class="s1">'</span><span class="s">/etc/snort/rules/local.rules'</span>
+        <span class="na">ids_rule_state</span><span class="pi">:</span> <span class="s">present</span>
+</code></pre></div></div>
+
+<p>Let’s have a quick look at what is happening here. the rule header is <code class="language-plaintext highlighter-rouge">alert tcp any any -&gt; any any</code>, so we create an alert for tcp traffic from any source to any destination.
+The rule options define the human readable Snort message if and when the rule finds a match. <code class="language-plaintext highlighter-rouge">uricontent</code> which is a specialized version of <code class="language-plaintext highlighter-rouge">content</code> making it easier to analyze URIs. The <code class="language-plaintext highlighter-rouge">classtype</code> is set to <code class="language-plaintext highlighter-rouge">attempted-user</code> which is the default class for “attempted user privilege gain”. SID is set to a value high enough for user defined rules. The priority is <code class="language-plaintext highlighter-rouge">1</code> and finally since this is the first version of this rule we set the revision to <code class="language-plaintext highlighter-rouge">1</code>.</p>
+
+<p>The other variables, <code class="language-plaintext highlighter-rouge">ids_rules_file</code> and  <code class="language-plaintext highlighter-rouge">ids_rule_state</code> provide the user defined location for the rules file and state that the rule should be created if it does not exist already (<code class="language-plaintext highlighter-rouge">present</code>).</p>
+
+<h2 id="step-35---run-the-playbook">Step 3.5 - Run the playbook</h2>
+
+<p>It is now time to execute the playbook. Call <code class="language-plaintext highlighter-rouge">ansible-playbook</code> with the playbook name:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student1@ansible ~]<span class="nv">$ </span>ansible-playbook add_snort_rule.yml
+
+PLAY <span class="o">[</span>Add Snort rule] <span class="k">*****************************************************************</span>
+
+TASK <span class="o">[</span>Gathering Facts] <span class="k">****************************************************************</span>
+ok: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>Add snort password attack rule] <span class="k">*************************************************</span>
+
+TASK <span class="o">[</span>ansible_security.ids_rule : verify required variable ids_provider is defined] <span class="k">***</span>
+skipping: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>ansible_security.ids_rule : ensure ids_provider is valid] <span class="k">***********************</span>
+skipping: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>ansible_security.ids_rule : verify required variable ids_rule is defined] <span class="k">*******</span>
+skipping: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>ansible_security.ids_rule : verify required variable ids_rule_state is defined] <span class="k">*</span>
+skipping: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>ansible_security.ids_rule : include ids_provider tasks] <span class="k">*************************</span>
+included: /home/student1/.ansible/roles/ansible_security.ids_rule/tasks/snort.yml <span class="k">for
+</span>snort
+
+TASK <span class="o">[</span>ansible_security.ids_rule : snort_rule] <span class="k">*****************************************</span>
+changed: <span class="o">[</span>snort]
+
+RUNNING HANDLER <span class="o">[</span>ansible_security.ids_rule : restart snort] <span class="k">***************************</span>
+changed: <span class="o">[</span>snort]
+
+PLAY RECAP <span class="k">****************************************************************************</span>
+snort  : <span class="nv">ok</span><span class="o">=</span>4  <span class="nv">changed</span><span class="o">=</span>2  <span class="nv">unreachable</span><span class="o">=</span>0  <span class="nv">failed</span><span class="o">=</span>0  <span class="nv">skipped</span><span class="o">=</span>4  <span class="nv">rescued</span><span class="o">=</span>0  <span class="nv">ignored</span><span class="o">=</span>0
+</code></pre></div></div>
+
+<p>As you can see when you run this playbook, there are many tasks executed in addition to adding the rules. For instance, the role reloads the Snort service after the rule is added. Other tasks ensure that the variables are defined and verified.
+This yet again highlights the value of using roles. By taking advantage of roles, you are not only making your content re-usable but you can also add verification tasks and other important steps and keep them neatly hidden inside the role. The users of the role do not need to know the specifics of how Snort works in order to use this role as part of their security automation.</p>
+
+<h2 id="step-36---verify-changes">Step 3.6 - Verify changes</h2>
+
+<p>A quick way to check if the rules were written correctly is to SSH to the Snort server and look for the content of the <code class="language-plaintext highlighter-rouge">/etc/snort/rules/local.rules</code> file.</p>
+
+<p>Another way is to use Ansible on our control host. To do this we use a different role to verify if a Snort rule is in place. This role searches and finds existing rules in Snort and is called <a href="http://github.com/ansible-security/ids_rule_facts">ids_rule_facts</a>.
+To use this role, as we did previously, we install it using <code class="language-plaintext highlighter-rouge">ansible-galaxy</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student&lt;X&gt;@ansible ~]<span class="nv">$ </span>ansible-galaxy <span class="nb">install </span>ansible_security.ids_rule_facts
+- downloading role <span class="s1">'ids_rule_facts'</span>, owned by ansible_security
+- downloading role from https://github.com/ansible-security/ids_rule_facts/archive/master.tar.gz
+- extracting ansible_security.ids_rule_facts to /home/student1/.ansible/roles/ansible_security.ids_rule_facts
+- ansible_security.ids_rule_facts <span class="o">(</span>master<span class="o">)</span> was installed successfully
+</code></pre></div></div>
+
+<p>In our VS Code online editor, we create a playbook, <code class="language-plaintext highlighter-rouge">verify_attack_rule.yml</code> to use it. Set the name of the playbook to something like “Verify Snort rule”. The values for hosts, the IDS provider variable and the <code class="language-plaintext highlighter-rouge">become</code> flag can be set to the same as in our previous playbook.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Verify Snort rule</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">snort</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="s">yes</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">ids_provider</span><span class="pi">:</span> <span class="s">snort</span>
+</code></pre></div></div>
+
+<p>Next, we import the role <code class="language-plaintext highlighter-rouge">ids_rule_facts</code>. We also need to provide a search string to identify the rule we are looking for. In our example, considering the rule we have created, it makes sense to use the <code class="language-plaintext highlighter-rouge">uricontent</code> rule option for this purpose.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Verify Snort rule</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">snort</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="s">yes</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">ids_provider</span><span class="pi">:</span> <span class="s">snort</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">import ids_rule_facts</span>
+      <span class="na">import_role</span><span class="pi">:</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">ansible_security.ids_rule_facts'</span>
+      <span class="na">vars</span><span class="pi">:</span>
+        <span class="na">ids_rule_facts_filter</span><span class="pi">:</span> <span class="s1">'</span><span class="s">uricontent:"/etc/passwd"'</span>
+</code></pre></div></div>
+
+<p>And most importantly, we want to be able to see what is actually found. The <code class="language-plaintext highlighter-rouge">ids_rule_facts</code> stores the data it collects as Ansible facts. Ansible facts are information specific to each individual host which can be used in further tasks. Therefore, we add another task to output these facts.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Verify Snort rule</span>
+  <span class="na">hosts</span><span class="pi">:</span> <span class="s">snort</span>
+  <span class="na">become</span><span class="pi">:</span> <span class="s">yes</span>
+
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">ids_provider</span><span class="pi">:</span> <span class="s">snort</span>
+
+  <span class="na">tasks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">import ids_rule_facts</span>
+      <span class="na">import_role</span><span class="pi">:</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">ansible_security.ids_rule_facts'</span>
+      <span class="na">vars</span><span class="pi">:</span>
+        <span class="na">ids_rule_facts_filter</span><span class="pi">:</span> <span class="s1">'</span><span class="s">uricontent:"/etc/passwd"'</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">output rules facts</span>
+      <span class="na">debug</span><span class="pi">:</span>
+        <span class="na">var</span><span class="pi">:</span> <span class="s">ansible_facts.ids_rules</span>
+</code></pre></div></div>
+
+<p>Now let’s execute the playbook to verify that our rule is part of the Snort installation:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student&lt;X&gt;@ansible ~]<span class="nv">$ </span>ansible-playbook verify_attack_rule.yml
+
+PLAY <span class="o">[</span>Verify Snort rule] <span class="k">**************************************************************</span>
+
+TASK <span class="o">[</span>Gathering Facts] <span class="k">****************************************************************</span>
+ok: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>ansible_security.ids_rule_facts : collect snort facts] <span class="k">**************************</span>
+ok: <span class="o">[</span>snort]
+
+TASK <span class="o">[</span>debugoutput rules facts] <span class="k">********************************************************</span>
+ok: <span class="o">[</span>snort] <span class="o">=&gt;</span>
+  ansible_facts.ids_rules:
+  - alert tcp and any -&gt; any any <span class="o">(</span>msg:<span class="s2">"Attempted /etc/passwd Attack"</span><span class="p">;</span>
+  uricontent:<span class="s2">"/etc/passwd"</span><span class="p">;</span> classtype:attempted-user<span class="p">;</span> sid:99000004<span class="p">;</span> priority:1<span class="p">;</span> rev:1<span class="p">;</span><span class="o">)</span>
+
+PLAY RECAP <span class="k">****************************************************************************</span>
+snort  : <span class="nv">ok</span><span class="o">=</span>3  <span class="nv">changed</span><span class="o">=</span>0  <span class="nv">unreachable</span><span class="o">=</span>0  <span class="nv">failed</span><span class="o">=</span>0  <span class="nv">skipped</span><span class="o">=</span>0  <span class="nv">rescued</span><span class="o">=</span>0  <span class="nv">ignored</span><span class="o">=</span>0
+</code></pre></div></div>
+
+<p>The last task outputs the rule which was found by the role. As you can see, it is the rule we previously added.</p>
+
+<p>Congratulations! You have completed the first steps of automating Snort with Ansible. Head back to the exercise overview and continue with the next step.</p>
+
+<hr>
+
+<p><a href="https://ansible.github.io/workshops/exercises/ansible_security/#section-1---introduction-to-ansible-security-automation-basics">Click Here to return to the Ansible Security Automation Workshop</a></p>
+
+      </section>
+
+      <footer>
+        <div class="footer-container">
+          <a href="https://redhat.com/">
+            <img class="footer-logo" src="./Exercise 1.3 - Executing the first Snort playbook _ workshops_files/redhat-logo.svg" title="Red Hat" alt="Red Hat">
+          </a>
+          <p class="footer-copyright">Copyright © 2020 Red Hat, Inc.</p>
+          <div class="footer-linkContainer">
+            <a href="https://www.redhat.com/en/about/privacy-policy" class="footer-link">Privacy statement</a>
+            <span class="footer-linkSpacer">|</span>
+            <a href="https://www.ansible.com/security?hsLang=en-us" class="footer-link">Security disclosure</a>
+            <span class="footer-linkSpacer">|</span>
+            <a href="https://www.redhat.com/en/about/all-policies-guidelines" class="footer-link">All policies and guidelines</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  
+
+</body></html>

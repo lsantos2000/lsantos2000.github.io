@@ -33,13 +33,17 @@
       </div>
     </header>
     <section>
-      <h1 id="exercise-14---executing-the-first-ibm-qradar">Exercise 1.4 - Executing the first IBM QRadar</h1>
-      <h2 id="step-41---ibm-qradar">Step 4.1 - IBM QRadar</h2>
+      <h1 id="exercise-14---executing-the-first-ibm-qradar">Exercise 1.4 - Executing the first IBM QRadar Remediation </h1>
+	  
+      <h2 id="ibm-qradar">IBM QRadar Lab Environment</h2>
+	  
       <p>To showcase how to automate a SIEM in a security environment, this lab contains a <a href="https://developer.ibm.com/qradar/ce/">IBM
       QRadar SIEM, community edition</a>.</p>
       <p>The SIEM can be accessed via web UI and via REST API. In this lab the playbooks we write will be interacting with the API in the
       background. All actions will be verified in the web UI.</p>
-      <h2 id="step-42---access-the-web-ui">Step 4.2 - Access the web UI</h2>
+	  
+      <h2 id="step-1">Step 1 - Access the web UI</h2>
+	  
       <p>Have a first look at the SIEM, and verify that it is actually working. Point your web browser towards <code class=
       "language-plaintext highlighter-rouge">https://&lt;qradar-IP&gt;</code>, where <code class=
       "language-plaintext highlighter-rouge">&lt;qradar-IP&gt;</code> is the IP address for the <code class=
@@ -86,11 +90,161 @@
       <strong>Rules</strong>. A long list of rules is displayed. In the search bar on top of this list, enter the following search term:
       <code class="language-plaintext highlighter-rouge">DDoS</code> Hit enter afterwards to filter the list.</p>
       <p>The list is filtered, and only shows few rules which are related to DDOS.</p>
-      <p><img src="./images/qradar-offenses-rules.png" alt="QRadar, filtered rules list"></p>
+ 
+	  <p><img src="./images/qradar_offenses.png" alt="QRadar, filtered rules list"></p>
       <p>Click the one called <strong>“Potential DDoS Against Single Host (TCP)”</strong>, note that it is enabled. This will be relevant later
       in this exercise.</p>
-      <p>Now that you had a very first glance at QRadar, it is time to look how it can be automated by Ansible.</p>
-      <h2 id="step-43---qradar-modules-and-ansible-collections">Step 4.3 - QRadar modules and Ansible collections</h2>
+	  
+	  <h2 id="step-2">Step 2 - Create a QRadar Custom Action Script</h2>
+	  
+	  <p>Incident Remedition happens in QRadar when some events create an offense, and we do something about it. We can attach scripts to 
+	  custom rules to do specific actions in response to network events. Use the Custom Action window to manage custom action scripts. 
+	  Use custom actions to select or define the value that is passed to the script and the resulting action.</p>
+
+      <p>For example, you can write a script to create a firewall rule that blocks a source IP address from your network in response to 
+	  a rule that is triggered by a defined number of failed login attempts.</p>
+
+      <p>The following examples are custom actions that are the outcomes of passing values to a script:</p>
+	  
+      <ul>
+        <li>Block users and domains.<br>
+        <li>Initiate work flows and updates in external systems.<br>
+        <li>Re-start existing services that have stopped or crashed.<br>
+        <li>Disables a user account on suspicious privileged activity</li>
+      </ul>	  
+	  
+      <p>As a matter of fact, we can remediate <a href="qradar_use_cases.html" target="_new">all these QRadar Use Cases</a></p>	  
+	  
+	  <p>Custom actions work best with low volume custom rule events and with custom rules that have a low response limiter value.
+      
+	  <p>This does not come defaulted in Qradar, to use this capability, a Custom Action Script needs to be created and a Custom Rule can be configured to fire the Custom Action Script. 
+	  When the Rule is triggered, there will be no clear indication that the Custom Action Script is running. But we can test the script.</p>
+	  
+      <p>The purpose of the provided sample script is to write a file named test.txt each time all rule tests are matched in a sample rule.</p>
+      <ol>
+        <li>Create a file with a .sh extension using the provided sample script:
+          <pre class="highlight">  <code class="hljs javascript">#!<span class="hljs-regexp">/bin/</span>bash  datetime=<span class=
+          "hljs-string">&quot;$(date)&quot;</span>  echo <span class=
+          "hljs-string">&quot;  Custom Action Script Test Time: $datetime&quot;</span> &gt;&gt; <span class=
+          "hljs-regexp">/home/</span>customactionuser/test.txt  echo <span class=
+          "hljs-string">&quot;Text written to /home/customactionuser/test.txt?&quot;</span></code></pre>
+        </li>
+        <li>Log in to the QRadar user interface and click the <strong>Admin</strong> tab.</li>
+        <li>Under <strong><span class="ph uicontrol">Custom Action</span></strong>, click <strong><span class="ph uicontrol">Define Custom
+        Action</span></strong>.</li>
+        <li>To upload your scripts, click <strong><span class="ph uicontrol">Add</span></strong>.</li>
+        <li>Type a descriptive name for the custom action.</li>
+        <li>Scroll down to <strong>Script configuration</strong> and Select <strong>Interpreter: Bash.</strong></li>
+        <li>Click <strong>Browse</strong> and locate the .sh file.</li>
+        <li>Scroll to the bottom of the <strong>Define Custom Action</strong> window &gt; click <strong>Save.</strong></li>
+        <li>Click <strong>Deploy Changes.</strong></li>
+      </ol>
+      <p></p>
+	  
+      <h2 id="step-3">Step 3 - Edit or create a rule to trigger your custom action</h2>
+	  
+      <ol>
+        <li>Log in to the QRadar user interface.</li>
+        <li>Click <strong>Offense</strong> tab &gt; <strong>Rules</strong>.</li>
+        <li>Locate or create a Custom Rule in the Rule Wizard that can be triggered easily.<br>
+        <strong>Tip</strong>: An example rule to test a custom action might be to use an authentication event from your existing log sources or
+        you could use a specific QID, such as the Offense Created QID (28250369) to test your custom action.</li>
+        <li>Edit the Rule to add the Host IP and a criteria such as successful login.<br>
+        Example of a rule.<br>
+        <img alt="image-20180713124028-1" data-entity-type="file" data-entity-uuid="19ac98bd-b985-4180-bd4f-c43d07f844e7" height="96" src=
+        "./images/image-20180713124028-1.png" width="745"></li>
+        <li>&nbsp;Click <strong>Next</strong> to configure Rule Responses</li>
+        <li>Check the box next to &#39;<strong>Execute Custom Action</strong>&#39;</li>
+        <li>Click the newly created Custom Action Script in the &#39;Custom Action to execute&#39; drop down box.<br>
+        <img alt="image-20180713124327-3" data-entity-type="file" data-entity-uuid="7dd6e9e0-634a-44d1-b770-1c5f4579e159" height="98" src=
+        "./images/image-20180713124327-3.png" width="649"></li>
+      </ol>
+      <p></p>
+	  
+      <h2 id="step-4">Step 4- Confirm your custom action script triggers</h2>
+	  
+      <p>Either by using &quot;Test Execution&quot; in the Define Actions window, or by confirming the Custom Rule has been triggered, verify
+      the test file is created or updated:</p>
+ 
+      <strong>To test your custom action in the user interface</strong>
+      <ol>
+        <li>Click the <strong>Admin</strong> tab.</li>
+        <li>Scroll to down to <strong>Custom Actions</strong>.</li>
+        <li>Click <strong>Define Actions.</strong></li>
+        <li>Highlight the test script.</li>
+        <li>Click <strong>Test Execution</strong> &gt; <strong>Execute</strong>.<br>
+        <img alt="image-20180713125625-4" data-entity-type="file" data-entity-uuid="c00818d8-7e27-4ad4-803b-f7db6fbf420f" height="508" width="554" src=
+        "./images/image-20180713125625-4.png" ></li>
+      </ol>
+      <strong>How to verify the test script in the command line</strong></p>
+      <ol>
+        <li>Create an event to cause the custom rule to trigger.</li>
+        <li>If you have your own environment, use SSH to log in to the Console as the root user. You can't do this with the Lab environment, as you
+		do not have root ssh access</li>
+        <li>To enter the shell to see the folder <em>customactionuser</em> use the <strong>chroot</strong> command:
+          <pre class="highlight"><code class="hljs sql">  chroot <span class=
+          "hljs-comment">--userspec=customactionuser /opt/qradar/bin/ca_jail/</span></code></pre>
+        </li>
+        <li>Use the ls command to see if the file exists<strong>:</strong>
+          <pre class="highlight">  <code class="hljs coffeescript">  ls -lh <span class="hljs-regexp">/home/customactionuser/</span></code></pre>
+        </li>
+        <li>&nbsp;While in the chroot&#39;ed shell, the file <strong>test.txt</strong> should be seen.
+          <pre class="highlight">  <code class="hljs coffeescript"> chroot --userspec=customactionuser <span class=
+          "hljs-regexp">/opt/qradar/bin/ca_jail/</span>  $ ls <span class=
+          "hljs-regexp">/home/customactionuser/</span>  test.txt?</code></pre><strong>Results</strong><br>
+          The file <em>test.txt</em> should exist in the <em>/home/customactionuser/</em> directory. The purpose of the sample script is to
+          write test.txt each time the rule response is triggered by a rule.
+        </li>
+      </ol>
+	  
+      <h2 id="step-5">Step 5- Passing parameters to a custom action script</h2>
+	  
+	  <p> The following information is taken from <a href="https://www.ibm.com/docs/en/qsip/7.3.2?topic=actions-passing-parameters-custom-action-script" target="_blank">this link.</a>
+	  Go there if need to copy and paste the scripts as text.
+	  
+	  <p>We are not going to exercise these scripts on this Lab, therefore the following is just FYI.
+	  	  
+	  <p>The Custom Action script functionality in QRadar was intended to allow admins to generate rule responses based off of data ingested 
+	  in QRadar. However, QRadar prevents scripts taking actions on the box that would cause performance issues or to make changes on 
+	  the appliance. All Custom Actions run within a jailshell, so you can pass data out of QRadar by setting parameters.	  
+
+	  <p>The Scripts can be written in Bash, Python, and Perl. Here we how how to pass parameters to custom action scripts.
+
+      <p>The following simple sample scripts show how to query the asset model API for an asset with the supplied offense source IP address. For the sake of this example, the scripts output the JSON that is returned by the endpoint.
+      
+      <p>The scripts require three parameters:
+    
+      <ol>
+        <li>Console IP address.</li>
+		<li>API token.</li>
+		<li>Offense source IP address.</li>
+      </ol>
+ 
+ 	  <p>These parameters are configured in the Define Custom Action window Script Parameters area:</p>
+	  
+	  <img style="max-width:40%;" src="./images/definecustomaction.png" title="Define Custom Action" alt="Define Custom Action">
+	  
+	  <p>Each parameter is passed to the script in the order in which it was added in the Define Custom Action window. In this case:
+      <ol>
+        <li>console_ip.</li>
+		<li>api_token.</li>
+		<li>offense_source_ip.</li>
+      </ol>
+	  
+	  <p>The API token was covered in the prev. exercise, we said you need to configure QRadar for the API
+	  to be accessible, and that a token and password is created following the steps <a href="https://api.xforce.ibmcloud.com/doc/#auth" target="_blank">in the IBM X-Force Exchange API
+      Documentation</a>
+	  
+	  <p>The variables that are defined at the beginning of each of the sample scripts use the sample parameter names that were added 
+	  in the Define Custom Action window.
+	  
+	  <img class="" src="./images/figure2.png" title="Define Custom Action" alt="Define Custom Action">
+	  <img class="" src="./images/figure3.png" title="Define Custom Action" alt="Define Custom Action">
+	  <img class="" src="./images/figure4.png" title="Define Custom Action" alt="Define Custom Action"> 
+	  
+	  
+      <h2 id="step-6">Step 6 - QRadar modules and Ansible collections</h2>
+	  
       <p>On the most basic level, Ansible automation performs tasks. Those tasks execute modules, which usually work on the corresponding
       targets, like an API endpoint of a special device or program.</p>
       <p>Ansible comes with a lot of modules included, but as of the time of writing, Ansible does not ship QRadar modules out of the box.
@@ -163,7 +317,9 @@ tests
         <p><strong>Note</strong></p>
         <p>If you want to try this at home: please note that this collection command requires at least Ansible version 2.9!</p>
       </blockquote>
-      <h2 id="step-44---first-example-playbook">Step 4.4 - First example playbook</h2>
+	  
+      <h2 id="step-7">Step 7 - First example playbook</h2>
+	  
       <p>In our first example to interface with QRadar we are going to enable/disable a rule. It is a rather small but common change and shows
       how Ansible and QRadar interact. We will do this in two steps: first we find the rule we want to change, afterwards we apply the
       change.</p>
@@ -355,7 +511,9 @@ qradar  : <span class="nv">ok</span><span class="o">=</span>3  <span class="nv">
         </div>
       </div><!--  -->
       <p>The playbook is now complete: it queries QRadar for the list of rules, and deactives the one we are looking for.</p>
-      <h2 id="step-45---run-the-playbook">Step 4.5 - Run the playbook</h2>
+	  
+      <h2 id="step-8">Step 8 - Run the playbook</h2>
+	  
       <p>After we completed the playbook, let’s execute it:</p>
       <div class="language-bash highlighter-rouge">
         <div class="highlight">
@@ -384,7 +542,9 @@ qradar  : <span class="nv">ok</span><span class="o">=</span>3  <span class="nv">
       </div>
       <p>As you can see, the playbook denotes a change: the rule was changed. Run the playbook again - it does not report a change anymore,
       since the rule is now already disabled.</p>
-      <h2 id="step-46---verfiy-changes-in-ui">Step 4.6 - Verfiy changes in UI</h2>
+	  
+      <h2 id="step-46---verfiy-changes-in-ui">Step 9 - Verfiy changes in UI</h2>
+	  
       <p>To verify that Ansible indeed changed something, we go back to the UI of QRadar. Open the QRadar IP in your web browser. Click on the
       <strong>Offenses</strong> tab, and from there on the left side click on <strong>Rules</strong>. The long list of rules is displayed. In
       the search bar on top of this list, enter the following search term: <code class="language-plaintext highlighter-rouge">DDoS</code> Hit
