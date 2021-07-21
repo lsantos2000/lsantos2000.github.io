@@ -34,10 +34,34 @@
     </header>
     <section>
       <h1 id="exercise-13---executing-the-first-snort-playbook">Exercise 1.3 - Executing the first Snort playbook</h1>
-      <h2 id="step-1---snort">Step 1 - Snort</h2>
-      <p>To showcase how to automate a network intrusion detection and intrusion prevention system in a security environment, this lab will
+	  
+	  <h2 id="exercise-1-3-objectives">Objectives</h2>
+	  
+	  <p>To showcase how to automate a network intrusion detection and intrusion prevention system in a security environment, this lab will
       take you through managing a Snort IDS instance. Snort analyzes network traffic and compares it against some given rule set. In this lab,
       Snort is installed on a Red Hat Enterprise Linux machine and Ansible interacts with it by accessing the RHEL node over SSH.</p>
+	  
+      <h2 id="step-1---snort">Step 1 - Snort</h2>
+	  
+      <p>Before we show you some actual QRadar Incident Remediation using Ansible, we want to inroduce you to Snort, 
+	  one of the most used Intrusion Detection & Prevention System (IDP) systems out there.</p>
+	  
+	  <strong>What is Snort?</strong>
+	  <p>Snort is a free open source network intrusion detection system and intrusion prevention system created in 1998 by Martin Roesch, 
+	  founder and former CTO of Sourcefire. Snort is now developed by Cisco, which purchased Sourcefire in 2013.</p>
+	  
+	  <strong>Installing Snort into the Operating System</strong>
+      <p>In our Lab, Snort has been installed and setup for you. If you want to use your own version of the image, you need to install Snort 
+	  into the operating system or virtual machine of your choice. To install the latest version of Snort, you can follow the installation
+      instruction from the Snort website. Note that installation instructions are vary from OSes. e.g. the instruction below shows how to 
+	  install snort from its source code on Linux.</p> 	 
+	  
+	  <p><img src="./images/snort-install.png" alt="Snort Install Instructions"></p>  
+	  
+	  <p>You can find more information here: <a href="https://www.snort.org/#get-started" target="_blank">Snort Get Started</a>
+	  
+	  <p>While you install the snort, you system may miss some libraries. You need to install the required libraries, too.</p>	   
+	  
       <h2 id="step-2---accessing-the-snort-server">Step 2 - Accessing the Snort server</h2>
       <p>In order to connect to the Snort installation, we need to to find the IP address of the machine it is installed on. You can then get
       the IP address of the Snort machine by looking up the information on the inventory file <code class=
