@@ -346,8 +346,10 @@ snort  : <span class="nv">ok</span><span class="o">=</span>4  <span class="nv">c
       reloads the Snort service after the rule is added. Other tasks ensure that the variables are defined and verified. This yet again
       highlights the value of using roles. By taking advantage of roles, you are not only making your content re-usable but you can also add
       verification tasks and other important steps and keep them neatly hidden inside the role. The users of the role do not need to know the
-      specifics of how Snort works in order to use this role as part of their security automation.</p>
+      specifics of how Snort works in order to use this role as part of their security automation.</p>	  
+	  
       <h2 id="step-6---verify-changes">Step 6 - Verify changes</h2>
+	  
       <p>A quick way to check if the rules were written correctly is to SSH to the Snort server and look for the content of the <code class=
       "language-plaintext highlighter-rouge">/etc/snort/rules/local.rules</code> file.</p>
       <p>Another way is to use Ansible on our control host. To do this we use a different role to verify if a Snort rule is in place. This role
@@ -464,6 +466,31 @@ snort  : <span class="nv">ok</span><span class="o">=</span>3  <span class="nv">c
       <p>The last task outputs the rule which was found by the role. As you can see, it is the rule we previously added.</p>
       <p>Congratulations! You have completed the first steps of automating Snort with Ansible. Head back to the exercise overview and continue
       with the next step.</p>
+	  
+	  
+      <h2 id="step-7---other">Check out these other rules</h2>
+	  
+      <p>Below we show you some other useful playbooks that will add more rules to <code class=
+      "language-plaintext highlighter-rouge">/etc/snort/rules/local.rules</code> file.</p>
+      
+	  <p><strong>Add new Snort signature for NMAP TCP XMAS SCAN</strong></p>
+	  
+	  <p>Identify NMAP XMAS Scan: as we know that TCP communication follows three-way handshake to established TCP connection with target machine but 
+	  sometimes instead of using SYN, SYN/ACK, ACK flag attacker choose XMAS scan to connect with the target by sending data 
+	  packets through Fin, PSH & URG flags. Let assume attacker may choose XMAS scanning for network enumeration then in that 
+	  situation we can apply the following rule in snort local rule file.</p>
+      
+	  <img src="./images/snort_other_rule1.png" title="Snor Rule" alt="Snor Rule"></a>
+		 
+	  <p><strong>Add new Snort signature for NMAP TCP SCAN</strong></p>
+	  
+      <p>Identify NMAP TCP Scan: now in order to connect with the target network, an attacker may go for networking enumeration either using TCP Protocol 
+	  or UDP protocol. Let’s assume attacker may choose TCP scanning for network enumeration then in that situation we can apply 
+	  the following rule in snort local rule file.</p>
+	  
+	  <img src="./images/snort_other_rule2.png" title="Snor Rule" alt="Snor Rule"></a>
+	  
+	  
       <hr>
       <p>You are done with the exercise. You can now <a href="./index.html#section-1">turn back to the list of exercises</a> or <a href=
       "./exercise_1_4.html">continue with 1.4, which is the last exercise of section 1</a></p>
