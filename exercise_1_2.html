@@ -84,9 +84,12 @@
 
 <p>You are now viewing the Check Point SmartConsole management interface. There might be a Internet Explorer Warning visible upon start. This can safely be closed and is due to limitations in the way IE works.</p>
 
-<p><img src="./images/smartconsole-main-window.png" alt="SmartConsole main window"></p>
+<p>Next, on the left side, click on <strong>SECURITY POLICIES</strong> and note that there is currently only one rule installed: to drop all traffic.</p>
 
-<p>Next, on the left side, click on <strong>SECURITY POLICIES</strong> and note that there is currently only one rule installed: to drop all traffic. Now you have a first idea of how Check Point looks like in term of the management interface. We will interact more with it - but first we go back to the command line to learn how to write Ansible playbooks interacting with Check Point.</p>
+<p><img src="./images/smartconsole-main-window1.png" alt="SmartConsole Security Policies window"></p>
+
+<p>Now you have a first idea of how Check Point looks like in term of the management interface. 
+We will interact more with it - but first we go back to the command line to learn how to write Ansible playbooks interacting with Check Point.</p>
 
 <h2 id="step-24---first-example-playbook">Step 4 - First example playbook</h2>
 
@@ -132,7 +135,14 @@
 
 <p>We will now write a playbook to change the configuration of the Check Point setup. We will start with a simple example where we will add a whiltelist entry in the firewall configuration to allow traffic from a certain machine to another. In our example we will allow the machine called <strong>attacker</strong> to send traffic to our machine <strong>snort</strong>.</p>
 
-<p>The playbook will be written and run on the Ansible control host. The language the playbook is written in is <a href="https://en.wikipedia.org/wiki/YAML">YAML</a>. In your browser, access the VS Code online editor. In the menu bar, click on <strong>File</strong> -&gt; <strong>New File</strong>. A new, empty file opens. Before we continue, let’s save it. Again in the menu bar, click on <strong>File</strong> -&gt; <strong>Save As…</strong>. The drop down menu opens suggesting the filename <strong>Untitled-1</strong> in the directory <strong>lab_inventory</strong>. Change this to <code class="language-plaintext highlighter-rouge">whitelist_attacker.yml</code> and remove the directory <strong>lab_inventory</strong> so that the full filename is: <code class="language-plaintext highlighter-rouge">/home/student&lt;X&gt;/whitelist_attacker.yml</code> where <code class="language-plaintext highlighter-rouge">&lt;X&gt;</code> is the student id assigned to you.</p>
+<p>The playbook will be written and run on the Ansible control host. The language the playbook is written in is <a href="https://en.wikipedia.org/wiki/YAML">YAML</a>. In your browser, 
+access the VS Code online editor. In the menu bar, click on <strong>File</strong> -&gt; <strong>New File</strong>. A new, empty file opens. 
+
+You will have to first set the language of the code you are going to write (Visual Studio suports many languages). Start typing YAML and once it shows up, select that option.
+
+<p><img src="./images/vstudio_yaml.png" alt="Visual Studio - Select YAML language"></p>
+
+<p>Before we continue, let’s save it. Again in the menu bar, click on <strong>File</strong> -&gt; <strong>Save As…</strong>. The drop down menu opens suggesting the filename <strong>Untitled-1</strong> in the directory <strong>lab_inventory</strong>. Change this to <code class="language-plaintext highlighter-rouge">whitelist_attacker.yml</code> and remove the directory <strong>lab_inventory</strong> so that the full filename is: <code class="language-plaintext highlighter-rouge">/home/student&lt;X&gt;/whitelist_attacker.yml</code> where <code class="language-plaintext highlighter-rouge">&lt;X&gt;</code> is the student id assigned to you.</p>
 
 <blockquote>
   <p><strong>Note</strong></p>
@@ -140,7 +150,7 @@
   <p>Make sure that the file, and all future operations, are always done in the home directory, <strong>/home/student&lt;X&gt;</strong>. This is crucial for the proper execution of the exercises.</p>
 </blockquote>
 
-<p>once we have saved the file in the proper place, we can add our playbook code. First, a playbook needs a name and the hosts it should be executed on. So let’s add those:</p>
+<p>Once we have saved the file in the proper place, we can add our playbook code. First, a playbook needs a name and the hosts it should be executed on. So let’s add those:</p>
 
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
 <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Whitelist Attacker</span>
@@ -279,6 +289,10 @@
         <span class="na">install_on_all_cluster_members_or_fail</span><span class="pi">:</span> <span class="s">yes</span>
       <span class="na">failed_when</span><span class="pi">:</span> <span class="no">false</span>
 </code></pre></div></div>
+
+<p>Remember to press Ctrl + S on your keybord, to save your changes. You will see something like the screen below:</p>
+
+<p><img src="./images/vstudio_script1.png" alt="Visual Studio - whitelist_attacker.yml "></p>
 <!--  -->
 
 <h2 id="step-25---run-the-playbook">Step 5 - Run the playbook</h2>
