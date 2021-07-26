@@ -220,10 +220,14 @@ You will have to first set the language of the code you are going to write (Visu
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student&lt;X&gt;@ansible ~]<span class="nv">$ </span>ansible-doc checkpoint_host
 </code></pre></div></div>
 
+<p>You will see documentation help that starts with the following lines:</p>
+
+<p><img src="./images/ansible-doc-checkpoint.png" alt="ansible-doc checkpoint_host in terminal"></p>
+
 <blockquote>
   <p><strong>Tip</strong></p>
 
-  <p>In <code class="language-plaintext highlighter-rouge">ansible-doc</code> you can use <code class="language-plaintext highlighter-rouge">up</code>/<code class="language-plaintext highlighter-rouge">down</code> arrows to scroll through the content and <code class="language-plaintext highlighter-rouge">q</code> to exit.</p>
+  <p>There are more lines, in <code class="language-plaintext highlighter-rouge">ansible-doc</code>, you can use <code class="language-plaintext highlighter-rouge">up</code>/<code class="language-plaintext highlighter-rouge">down</code> arrows to scroll through the content and <code class="language-plaintext highlighter-rouge">q</code> to exit.</p>
 </blockquote>
 
 <p>In the same way we defined the source IP host object, we will now add the destination IP host object:</p>
@@ -290,10 +294,10 @@ You will have to first set the language of the code you are going to write (Visu
       <span class="na">failed_when</span><span class="pi">:</span> <span class="no">false</span>
 </code></pre></div></div>
 
-<p>Remember to press Ctrl + S on your keybord, to save your changes. You will see something like the screen below:</p>
+<p>Remember to press Ctrl + S on your keyboard, to save your file changes. You will see something like the screen below:</p>
 
 <p><img src="./images/vstudio_script1.png" alt="Visual Studio - whitelist_attacker.yml "></p>
-<!--  -->
+
 
 <h2 id="step-25---run-the-playbook">Step 5 - Run the playbook</h2>
 
@@ -302,7 +306,12 @@ You will have to first set the language of the code you are going to write (Visu
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>student&lt;X&gt;@ansible ansible-files]<span class="nv">$ </span>ansible-playbook <span class="nt">--syntax-check</span> whitelist_attacker.yml
 </code></pre></div></div>
 
-<p>The syntax check should report no errors. If it does report an error, check the output and try to fix the problem in the playbook code.</p>
+<p>The syntax check should report no errors, and just show one line, like the screen below.</p>
+
+<p><img src="./images/script1-syntax-check.png" alt="whitelist_attacker.yml syntax check"></p>
+
+<p>If it does report an error, check the output and try to fix the problem in the playbook code. Look at possible typos, or wrong identation. The best way to do this, is to 
+position your cursor at the very top left of your file (column 1, line 1) and copy and paste the whole code, do not try to type in the code manually.</p>
 
 <p>Now you should be ready to run your playbook:</p>
 
@@ -330,11 +339,20 @@ checkpoint  : <span class="nv">ok</span><span class="o">=</span>4 <span class="n
 
 <p>Now it’s time to check if the changes really did take place and Check Point MGMT server’s configuration was altered.</p>
 
-<p>Access the Windows workstation and open the SmartConsole interface. On the right side, underneath <strong>Object Categories</strong>, click on <strong>Network Objects</strong>, then pick <strong>Hosts</strong>. It should list both new host entries.</p>
+<p>Access the Windows workstation and open the SmartConsole interface. On the right side, underneath <strong>Object Categories</strong>, click on <strong>Network Objects</strong>
+
+<p><img src="./images/smartconsole-hosts-list0.png" alt="SmartConsole Network Objects"></p>
+
+<p>Then pick <strong>Hosts</strong>.</p>
+
+<p><img src="./images/smartconsole-hosts-list1.png" alt="SmartConsole Network Objects > Hosts"></p>
+
+<p>It should list both new host entries.</p>
 
 <p><img src="./images/smartconsole-hosts-list.png" alt="SmartConsole Hosts list"></p>
 
-<p>Next, on the left side, click on <strong>SECURITY POLICIES</strong>. Notice the additional access control policy entry in the middle of the field, compare this with when we looked at this earlier. Since the traffic is allowed now, the entry in the <strong>Action</strong> column is changed and has a different color.</p>
+<p>Next, on the left side, click on <strong>SECURITY POLICIES</strong>. Notice the additional access control policy entry in the middle of the field, 
+compare this with when we looked at this earlier. Since the traffic is allowed now, the entry in the <strong>Action</strong> column is changed and has a different color.</p>
 
 <p><img src="./images/smartconsole-policy-entry.png" alt="SmartConsole Policy Entries"></p>
 
@@ -346,7 +364,13 @@ checkpoint  : <span class="nv">ok</span><span class="o">=</span>4 <span class="n
 
   <p><img src="./images/smartconsole-change-logging.png" alt="SmartConsole, change logging"></p>
 
-<p>Afterwards, click on the <strong>Install Policy</strong> button at the top of the list of policies, confirm the dialog which opens with <strong>Publish &amp; Install</strong> and in the last dialog, click <strong>Install</strong> again.</p>
+<p>Afterwards, click on the <strong>Install Policy</strong> button at the top of the list of policies, confirm the dialog which opens with <strong>Publish &amp; Install</strong> 
+
+<p><img src="./images/publish.png" alt="SmartConsole Publish"></p>
+
+<p>and in the last dialog, click <strong>Install</strong> again.</p>
+
+<p><img src="./images/install.png" alt="SmartConsole Install"></p>
 
 <p>As a result, in the left corner, a small window pops up informing you of the progress of the deployment of the change.</p>
 
