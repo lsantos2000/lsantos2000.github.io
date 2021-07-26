@@ -39,16 +39,14 @@
 	  
 	  <p>To showcase how to automate a network intrusion detection and intrusion prevention system in a security environment, this lab will
       take you through managing a Snort IDS instance. Snort analyzes network traffic and compares it against some given rule set. In this lab,
-      Snort is installed on a Red Hat Enterprise Linux machine and Ansible interacts with it by accessing the RHEL node over SSH.</p>
+      Snort is installed on a Red Hat Enterprise Linux machine and Ansible interacts with it by accessing the RHEL node over SSH. 
+	  This is needed, as we are going to use Snort to send logs to QRadar, so we get some "attacker" traffic there</p>
 	  
       <h2 id="step-1---snort">Step 1 - Snort</h2>
 	  
-      <p>Before we show you some actual QRadar Incident Remediation using Ansible, we want to inroduce you to Snort, 
-	  one of the most used Intrusion Detection & Prevention System (IDP) systems out there.</p>
-	  
-	  <strong>What is Snort?</strong>
-	  <p>Snort is a free open source network intrusion detection system and intrusion prevention system created in 1998 by Martin Roesch, 
-	  founder and former CTO of Sourcefire. Snort is now developed by Cisco, which purchased Sourcefire in 2013.</p>
+	  <p>Snort is a free, open source, Network Intrusion Detection & Prevention System (IDP),  created in 1998 by Martin Roesch, 
+	  founder and former CTO of Sourcefire. Snort is now developed by Cisco, which purchased Sourcefire in 2013. Snort is one of the most 
+	  used IDP products out there.</p>
 	  
 	  <strong>Installing Snort into the Operating System</strong>
       <p>In our Lab, Snort has been installed and setup for you. If you want to use your own version of the image, you need to install Snort 
