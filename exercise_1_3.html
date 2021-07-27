@@ -362,7 +362,10 @@ snort  : <span class="nv">ok</span><span class="o">=</span>4  <span class="nv">c
       <h2 id="step-6---verify-changes">Step 6 - Verify changes</h2>
 	  
       <p>A quick way to check if the rules were written correctly is to SSH to the Snort server and look for the content of the <code class=
-      "language-plaintext highlighter-rouge">/etc/snort/rules/local.rules</code> file.</p>
+      "language-plaintext highlighter-rouge">/etc/snort/rules/local.rules</code> file. Please remember, IPs will be different below:</p>
+	  
+	  <p><img src="./images/verify-snort-rule.png" alt="Verify Snort Rule"></p>	  
+	  
       <p>Another way is to use Ansible on our control host. To do this we use a different role to verify if a Snort rule is in place. This role
       searches and finds existing rules in Snort and is called <a href="http://github.com/ansible-security/ids_rule_facts">ids_rule_facts</a>.
       To use this role, as we did previously, we install it using <code class="language-plaintext highlighter-rouge">ansible-galaxy</code>:</p>
