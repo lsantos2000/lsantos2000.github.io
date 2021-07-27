@@ -65,15 +65,19 @@
       the IP address of the Snort machine by looking up the information on the inventory file <code class=
       "language-plaintext highlighter-rouge">~/lab_inventory/hosts</code>. In your VS Code online editor, in the menu bar click on
       <strong>File</strong> &gt; <strong>Open File…</strong> and open the file <code class=
-      "language-plaintext highlighter-rouge">/home/student&lt;X&gt;/lab_inventory/hosts</code>. Search and find the entry for snort which looks
-      like this:</p>
+      "language-plaintext highlighter-rouge">/home/student&lt;X&gt;/lab_inventory/hosts</code>. 
+	  
+      <p><img src="./images/snort-ip.png" alt="Snort IP Instructions"></p>  	  
+	  
+	  Search and find the entry for snort which looks like this:</p>
       <div class="language-bash highlighter-rouge">
         <div class="highlight">
           <pre class="highlight"><code>snort <span class="nv">ansible_host</span><span class="o">=</span>22.333.44.5 <span class=
           "nv">ansible_user</span><span class="o">=</span>ec2-user <span class="nv">private_ip</span><span class="o">=</span>172.16.1.2
 </code></pre>
         </div>
-      </div>
+      </div>    
+	  
       <blockquote>
         <p><strong>NOTE</strong></p>
         <p>The IP addresses here are for demo purposes and will be different in your case. You have your own dedicated Snort setup in your
@@ -136,7 +140,16 @@ Last login: Mon Aug 26 12:17:48 2019 from h-213.61.244.2.host.de.colt.net
       </blockquote>
       <p>Exit the Snort server now by pressing <code class="language-plaintext highlighter-rouge">CTRL</code> and <code class=
       "language-plaintext highlighter-rouge">D</code>, or by typing <code class="language-plaintext highlighter-rouge">exit</code> on the
-      command line. All further interaction will be done via Ansible from the Ansible control host.</p>
+      command line. This will take you back to the ansible ssh prompt. </p>
+	  
+      <div class="language-bash highlighter-rouge">
+        <div class="highlight">		
+          <pre class="highlight"><code><span>Connection to <span class="s1">&#39;22.333.44.5 &#39;</span> closed.</br>[</span>student&lt;X&gt;@ansible ~]<span class="nv"> </span> 
+</code></pre>
+        </div>
+      </div>	  
+	 
+	  <p>All further interaction will be done via Ansible from the Ansible control host.</p>
       <h2 id="step-3---simple-snort-rules">Step 3 - Simple Snort rules</h2>
       <p>In the most basic capacity, Snort works by reading some rules and acting according to them. In this lab, we will be working with some
       simple examples of Snort in order to show how to automate this configuration with Ansible. This session is not designed to dive into the
